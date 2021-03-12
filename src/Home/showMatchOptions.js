@@ -142,8 +142,8 @@ function MatchOptions(props) {
     const [iceDamage, setIceDamage] = React.useState(options.iceDamage);
     const changeIceDamage = (event, value) => {
         value = Number(value);
-        options.rockDamage = value;
-        setRockDamage(value);
+        options.iceDamage = value;
+        setIceDamage(value);
         sendUpdate();
     };
     const [leaveDamage, setLeaveDamage] = React.useState(options.leaveDamage);
