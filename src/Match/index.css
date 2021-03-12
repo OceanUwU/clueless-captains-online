@@ -1,0 +1,11 @@
+.inactive-game {
+    opacity: 0.5;
+}
+
+.game-outcome-decided {
+    opacity: 0.3 !important;
+}
+
+#controller canvas {
+    max-width: 100%;
+}
