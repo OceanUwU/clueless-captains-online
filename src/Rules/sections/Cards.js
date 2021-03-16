@@ -18,8 +18,14 @@ function Cards() {
             <Typography variant="h5">Movement</Typography>
             <img src="/cards/n1.png" className={classes.card} />
             <img src="/cards/w2.png" className={classes.card} />
-            <img src="/cards/e3.png" className={classes.card} />
+            <img src="/cards/se3.png" className={classes.card} />
             <Typography>These cards allow you to move the ship a specified amount in a specified direction. The direction is the letter and border colour, and the amount is the number displayed.</Typography>
+            <br />
+            <Typography variant="h5">Direction movement cards</Typography>
+            <img src="/cards/turnl2.png" className={classes.card} />
+            <img src="/cards/flip.png" className={classes.card} />
+            <img src="/cards/forward2.png" className={classes.card} />
+            <Typography>Turning cards turn the ship a specified amount, and forward cards move the ship in whatever direction the ship is facing. The ship is a lot harder to control using these.</Typography>
             <br />
             <Typography variant="h5">Special movement cards</Typography>
             <Typography variant="h6">Relocate</Typography>

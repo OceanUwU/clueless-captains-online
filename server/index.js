@@ -146,11 +146,10 @@ let optionsValid = options => (
     && Number.isInteger(options.treasureHeal)
     && options.treasureHeal >= treasureHealAllowed[0]
     && options.treasureHeal <= treasureHealAllowed[1]
-    && Number.isInteger(options.boardSize)
-    && options.boardSize >= boardSizeAllowed[0]
-    && options.boardSize <= boardSizeAllowed[1]
+    && Array.isArray(options.boardSize)
+    && options.boardSize.every(i => Number.isInteger(i) && i >= boardSizeAllowed[0] && i <= boardSizeAllowed[1])
     && Array.isArray(options.startPos)
-    && options.startPos.every((i, e) => Number.isInteger(i) && i >= 0 && i < options.boardSize)
+    && options.startPos.every((i, e) => Number.isInteger(i) && i >= 0 && i < options.boardSize[e])
     && Number.isInteger(options.startDir)
     && options.startDir >= 0
     && options.startDir <= 10
@@ -160,7 +159,7 @@ let optionsValid = options => (
     && tiles.every(tile=>options.tiles.hasOwnProperty(tile[0])) //every tile type name is a real tile type name
     && Object.values(options.tiles).every(tile => Number.isInteger(tile) && tile >= 0) //every tile's value is an integer
     && requiredTiles.every(tile => options.tiles[tile] > 0) //every required tile has a value of at least 1
-    && Object.values(options.tiles).reduce((a,b)=>a+b) < options.boardSize**2 //there arent more tiles than the board can handle
+    && Object.values(options.tiles).reduce((a,b)=>a+b) < options.boardSize[0]*options.boardSize[1] //there arent more tiles than the board can handle
     && Number.isInteger(options.treasuresNeeded)
     && options.treasuresNeeded >= 1
     && options.treasuresNeeded <= options.tiles.treasure

@@ -7,7 +7,7 @@
     "iceDamage": 2,
     "leaveDamage": 1,
     "treasureHeal": 0,
-    "boardSize": 7,
+    "boardSize": [7, 7],
     "startPos": [3, 3],
     "startDir": 1,
     "revealTiles": false,

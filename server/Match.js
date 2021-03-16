@@ -213,16 +213,16 @@ class Match {
             default: this.dir = this.startDir - 3;
         }
         this.HP = this.startHP;
-        let tiles = shuffleArray([].concat.apply([], [...nonWaterTiles, Array(((this.boardSize**2)-1)-nonWaterTiles.reduce((a,b)=>(typeof a == 'object' ? a.length : a)+b.length)).fill('water')]));
-        tiles.splice(this.boardSize*this.startPos[0]+this.startPos[1], 0, 'water');
+        let tiles = shuffleArray([].concat.apply([], [...nonWaterTiles, Array(((this.boardSize[0]*this.boardSize[1])-1)-nonWaterTiles.reduce((a,b)=>(typeof a == 'object' ? a.length : a)+b.length)).fill('water')]));
+        tiles.splice(this.boardSize[1]*this.startPos[0]+this.startPos[1], 0, 'water');
         this.board = [];
-        for (let y = 0; y < this.boardSize; y++) {
+        for (let y = 0; y < this.boardSize[0]; y++) {
             let row = [];
-            for (let x = 0; x < this.boardSize; x++)
-                row.push(tiles[y*this.boardSize+x]);
+            for (let x = 0; x < this.boardSize[1]; x++)
+                row.push(tiles[y*this.boardSize[1]+x]);
             this.board.push(row);
         }
-        this.revealed = Array(this.boardSize).fill(null).map(e => Array(this.boardSize).fill(this.revealTiles));
+        this.revealed = Array(this.boardSize[0]).fill(null).map(e => Array(this.boardSize[1]).fill(this.revealTiles));
         this.revealed[this.startPos[0]][this.startPos[1]] = true; //boat spawn tile is revealed
 
         //make+shuffle deck
@@ -508,7 +508,7 @@ class Match {
             this.ship[1] += direction[1]*mult;
 
             //if ship tried to leave board
-            if (this.ship[0] >= this.boardSize || this.ship[0] < 0 || this.ship[1] >= this.boardSize || this.ship[1] < 0) { //if ship is out of bounds
+            if (this.ship[0] >= this.boardSize[0] || this.ship[0] < 0 || this.ship[1] >= this.boardSize[1] || this.ship[1] < 0) { //if ship is out of bounds
                 this.ship[0] -= direction[0]*mult; //undo the move
                 this.ship[1] -= direction[1]*mult;
                 this.damageShip(this.leaveDamage); //damage it

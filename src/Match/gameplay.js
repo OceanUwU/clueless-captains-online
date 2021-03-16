@@ -40,38 +40,38 @@ function renderBoard() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
     //horizontal gridlines
     ctx.fillStyle = 'black';
-    for (let x = 1; x < matchInfo.options.boardSize; x++)
-        ctx.fillRect(borderSize, (gridlineSize+boxSize)*x-gridlineSize+borderSize, ((gridlineSize+boxSize)*matchInfo.options.boardSize)-gridlineSize, gridlineSize);
+    for (let x = 1; x < matchInfo.options.boardSize[0]; x++)
+        ctx.fillRect(borderSize, (gridlineSize+boxSize)*x-gridlineSize+borderSize, ((gridlineSize+boxSize)*matchInfo.options.boardSize[1])-gridlineSize, gridlineSize);
     //vertical gridlines
-    for (let y = 1; y < matchInfo.options.boardSize; y++)
-        ctx.fillRect((gridlineSize+boxSize)*y-gridlineSize+borderSize, borderSize, gridlineSize, ((gridlineSize+boxSize)*matchInfo.options.boardSize)-gridlineSize);
+    for (let y = 1; y < matchInfo.options.boardSize[1]; y++)
+        ctx.fillRect((gridlineSize+boxSize)*y-gridlineSize+borderSize, borderSize, gridlineSize, ((gridlineSize+boxSize)*matchInfo.options.boardSize[0])-gridlineSize);
     
     //left (blue) border
     ctx.fillStyle = '#0100fc';
-    ctx.fillRect(0, 0, borderSize, (gridlineSize+boxSize)*matchInfo.options.boardSize-gridlineSize+borderSize*2);
+    ctx.fillRect(0, 0, borderSize, (gridlineSize+boxSize)*matchInfo.options.boardSize[0]-gridlineSize+borderSize*2);
     //right (green) border
     ctx.fillStyle = '#02fe01';
-    ctx.fillRect((gridlineSize+boxSize)*matchInfo.options.boardSize-gridlineSize+borderSize, 0, borderSize, (gridlineSize+boxSize)*matchInfo.options.boardSize-gridlineSize+borderSize*2);
+    ctx.fillRect((gridlineSize+boxSize)*matchInfo.options.boardSize[1]-gridlineSize+borderSize, 0, borderSize, (gridlineSize+boxSize)*matchInfo.options.boardSize[0]-gridlineSize+borderSize*2);
     //top (red) border
     ctx.fillStyle = '#fe0000';
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.lineTo(borderSize, borderSize);
-    ctx.lineTo((gridlineSize+boxSize)*matchInfo.options.boardSize-gridlineSize+borderSize, borderSize);
-    ctx.lineTo((gridlineSize+boxSize)*matchInfo.options.boardSize-gridlineSize+borderSize*2, 0);
+    ctx.lineTo((gridlineSize+boxSize)*matchInfo.options.boardSize[1]-gridlineSize+borderSize, borderSize);
+    ctx.lineTo((gridlineSize+boxSize)*matchInfo.options.boardSize[1]-gridlineSize+borderSize*2, 0);
     ctx.fill();
-    //left (yellow) border
+    //bottom (yellow) border
     ctx.fillStyle = '#fdff06';
     ctx.beginPath();
-    ctx.moveTo(0, (gridlineSize+boxSize)*matchInfo.options.boardSize-gridlineSize+borderSize*2);
-    ctx.lineTo((gridlineSize+boxSize)*matchInfo.options.boardSize-gridlineSize+borderSize*2, (gridlineSize+boxSize)*matchInfo.options.boardSize-gridlineSize+borderSize*2);
-    ctx.lineTo((gridlineSize+boxSize)*matchInfo.options.boardSize-gridlineSize+borderSize, (gridlineSize+boxSize)*matchInfo.options.boardSize-gridlineSize+borderSize);
-    ctx.lineTo(borderSize, (gridlineSize+boxSize)*matchInfo.options.boardSize-gridlineSize+borderSize);
+    ctx.moveTo(0, (gridlineSize+boxSize)*matchInfo.options.boardSize[0]-gridlineSize+borderSize*2);
+    ctx.lineTo((gridlineSize+boxSize)*matchInfo.options.boardSize[1]-gridlineSize+borderSize*2, (gridlineSize+boxSize)*matchInfo.options.boardSize[0]-gridlineSize+borderSize*2);
+    ctx.lineTo((gridlineSize+boxSize)*matchInfo.options.boardSize[1]-gridlineSize+borderSize, (gridlineSize+boxSize)*matchInfo.options.boardSize[0]-gridlineSize+borderSize);
+    ctx.lineTo(borderSize, (gridlineSize+boxSize)*matchInfo.options.boardSize[0]-gridlineSize+borderSize);
     ctx.fill();
 
     //draw tiles
-    for (let y = 0; y < matchInfo.options.boardSize; y++)
-        for (let x = 0; x < matchInfo.options.boardSize; x++) {
+    for (let y = 0; y < matchInfo.options.boardSize[0]; y++)
+        for (let x = 0; x < matchInfo.options.boardSize[1]; x++) {
             let img = images.tiles[matchInfo.board[y][x]]; //get image of tile
             if (img.complete) //if the image has loaded
                 ctx.drawImage(img, (gridlineSize+boxSize)*x+borderSize, (gridlineSize+boxSize)*y+borderSize, boxSize, boxSize); //draw it
@@ -103,7 +103,6 @@ function renderBoard() {
         else {
             direction.progress = Math.min(1, direction.progress+((1000/boardFPS)/direction.time));
             matchInfo.dir = direction.from + (direction.diff * direction.progress);
-            console.log(matchInfo.dir);
         }
     }
     ctx.globalAlpha = 1;
@@ -135,9 +134,8 @@ function playMatch(startingMatchInfo, sentId) {
     ReactDOM.render(<ThemeProvider theme={theme}><CssBaseline /><Match matchInfo={matchInfo} players={startingMatchInfo.players} myId={myId} /></ThemeProvider>, document.getElementById('root'), () => {
         canvas = document.getElementById('gameBoard');
         ctx = canvas.getContext('2d');
-        let imgSize = (boxSize+gridlineSize)*matchInfo.options.boardSize-gridlineSize+borderSize*2;
-        canvas.width = imgSize;
-        canvas.height = imgSize;
+        canvas.width = (boxSize+gridlineSize)*matchInfo.options.boardSize[1]-gridlineSize+borderSize*2;
+        canvas.height = (boxSize+gridlineSize)*matchInfo.options.boardSize[0]-gridlineSize+borderSize*2;
 
         document.getElementById('treasuresNeeded').innerHTML = matchInfo.options.treasuresNeeded;
         document.getElementById('treasuresTotal').innerHTML = matchInfo.options.tiles.treasure;

@@ -187,16 +187,15 @@ function MatchOptions(props) {
         setTreasureHeal(value);
         sendUpdate();
     };
-    const [boardSize, setBoardSize] = React.useState(options.boardSize);
-    const changeBoardSize = event => {
-        options.boardSize = event.target.value;
-        setBoardSize(event.target.value);
+    const [boardSize, setBoardSize] = React.useState([...options.boardSize]);
+    const changeBoardSize = (value, axis) => {
+        options.boardSize[axis] = value;
+        setBoardSize([...options.boardSize]);
         resetTiles();
-        options.startPos = [Math.round((options.boardSize-1)/2), Math.round((options.boardSize-1)/2)];
+        options.startPos = [Math.round((options.boardSize[0]-1)/2), Math.round((options.boardSize[1]-1)/2)];
         setStartPos([...options.startPos]);
         sendUpdate();
     };
-    console.log(options)
     const [startPos, setStartPos] = React.useState([...options.startPos]);
     const changeStartPos = (value, axis) => {
         options.startPos[axis] = value;
@@ -232,7 +231,7 @@ function MatchOptions(props) {
         sendUpdate();
     };
     const resetTiles = () => {
-        let newTiles = {...tiles, ...(options.boardSize**2 > Object.values(defaultMatchOptions.tiles).reduce((a,b)=>a+b) ? defaultMatchOptions.tiles : Object.fromEntries(Object.entries(defaultMatchOptions.tiles).map(e => [e[0], tilesAvailable.find(t => t[0] == e[0])[1] ? 1 : 0])))};
+        let newTiles = {...tiles, ...(options.boardSize[0]**options.boardSize[1] > Object.values(defaultMatchOptions.tiles).reduce((a,b)=>a+b) ? defaultMatchOptions.tiles : Object.fromEntries(Object.entries(defaultMatchOptions.tiles).map(e => [e[0], tilesAvailable.find(t => t[0] == e[0])[1] ? 1 : 0])))};
         setTiles(newTiles);
         options.tiles = {...newTiles};
     };
@@ -268,12 +267,6 @@ function MatchOptions(props) {
         options.topPlayed = value;
         setTopPlayed(value);
         resetCards();
-        sendUpdate();
-    };
-    const [rows, setRows] = React.useState(options.rows);
-    const changeRows = event => {
-        options.rows = event.target.value;
-        setRows(event.target.value);
         sendUpdate();
     };
     const [cards, setCards] = React.useState(options.cards);
@@ -424,29 +417,39 @@ function MatchOptions(props) {
             <br />
             <FormControl className={classes.formControl}>
                 <Select
-                    value={boardSize}
-                    onChange={changeBoardSize}
+                    value={boardSize[1]}
+                    onChange={e => changeBoardSize(e.target.value, 1)}
                     displayEmpty
-                    className={classes.select}
+                    className={classes.smallSelect}
                     disabled={!props.editable}
                 >
-                    {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(n => <MenuItem key={n} value={n}>{n}x{n} ({n*n} tiles)</MenuItem>)}
+                    {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(n => <MenuItem key={n} value={n}>{n}</MenuItem>)}
                 </Select>
-                <Typography>Changing this will also reset the amounts of each type of tile and the ship's starting location.</Typography>
-                {/*<FormHelperText>Width x Height</FormHelperText>*/}
+                <FormHelperText>Width</FormHelperText>
             </FormControl>
-            {/*<span style={{
+            <span style={{
+                position: 'relative',
+                top: 10,
+                fontSize: 35,
+            }}>x</span>
+            <FormControl className={classes.formControl}>
+                <Select
+                    value={boardSize[0]}
+                    onChange={e => changeBoardSize(e.target.value, 0)}
+                    displayEmpty
+                    className={classes.smallSelect}
+                    disabled={!props.editable}
+                >
+                    {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(n => <MenuItem key={n} value={n}>{n}</MenuItem>)}
+                </Select>
+                <FormHelperText>Height</FormHelperText>
+            </FormControl>
+            <span style={{
                 position: 'relative',
                 top: 14,
                 fontSize: 16,
-            }}>= {boardSize**2} tiles</span>*/}
-
-            {/*<FormControl className={classes.formControl}>
-                <InputLabel>Players</InputLabel>
-                <Select value={players} onChange={handlePlayersChange}>
-                    {[...Array(allowedPlayersMax+1).keys()].slice(allowedPlayersMin).map(i => <MenuItem value={i}>{i}</MenuItem>)}
-                </Select>
-            </FormControl>*/}
+            }}>= {boardSize[1] * boardSize[0]} tiles</span>
+            <Typography>Changing this will also reset the amounts of each type of tile and the ship's starting location.</Typography>
 
             <Divider />
 
@@ -462,7 +465,7 @@ function MatchOptions(props) {
                     className={classes.smallSelect}
                     disabled={!props.editable}
                 >
-                    {Array(boardSize).fill(null).map((i, e) => e).map(n => <MenuItem key={n} value={n}>{n+1}</MenuItem>)}
+                    {Array(boardSize[1]).fill(null).map((i, e) => e).map(n => <MenuItem key={n} value={n}>{n+1}</MenuItem>)}
                 </Select>
                 <FormHelperText>X</FormHelperText>
             </FormControl>
@@ -476,10 +479,10 @@ function MatchOptions(props) {
                     value={startPos[0]}
                     onChange={e => changeStartPos(e.target.value, 0)}
                     displayEmpty
-                    className={classes.smalSelect}
+                    className={classes.smallSelect}
                     disabled={!props.editable}
                 >
-                    {Array(boardSize).fill(null).map((i, e) => e).map(n => <MenuItem key={n} value={n}>{n+1}</MenuItem>)}
+                    {Array(boardSize[0]).fill(null).map((i, e) => e).map(n => <MenuItem key={n} value={n}>{n+1}</MenuItem>)}
                 </Select>
                 <FormHelperText>Y</FormHelperText>
             </FormControl>
@@ -537,11 +540,11 @@ function MatchOptions(props) {
                         tilesAvailable.map(tile => <span style={{marginRight: 5, textAlign: 'center'}}>
                             <img src={`/tiles/${tile[0]}.png`} width={50} />
                             <br />
-                            <NumberTweaker fn={change => changeTiles(change, tile[0])} min={tile[1] ? 1 : 0} max={(boardSize**2)-(Object.values(tiles).reduce((a,b)=>a+b)-tiles[tile[0]])-1} state={tiles[tile[0]]} disabled={!props.editable} />
+                            <NumberTweaker fn={change => changeTiles(change, tile[0])} min={tile[1] ? 1 : 0} max={(boardSize[0]*boardSize[1])-(Object.values(tiles).reduce((a,b)=>a+b)-tiles[tile[0]])-1} state={tiles[tile[0]]} disabled={!props.editable} />
                         </span>)
                     }
                 </div>
-                <Typography>There will be {(boardSize**2)-Object.values(tiles).reduce((a,b)=>a+b)} water tile(s).</Typography>
+                <Typography>There will be {(boardSize[0]*boardSize[1])-Object.values(tiles).reduce((a,b)=>a+b)} water tile(s).</Typography>
             </FormControl>
 
             <Divider />
