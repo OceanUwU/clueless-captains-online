@@ -14,7 +14,6 @@ function Cards() {
     return (
         <div>
             <Typography variant="h4">Cards</Typography>
-            
             <Typography variant="h5">Movement</Typography>
             <img src="/cards/n1.png" className={classes.card} />
             <img src="/cards/w2.png" className={classes.card} />

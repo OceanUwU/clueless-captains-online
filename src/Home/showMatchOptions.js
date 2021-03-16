@@ -305,12 +305,19 @@ function MatchOptions(props) {
         setStartHP(options.startHP);
         setMaxHP(options.maxHP);
         setRockDamage(options.rockDamage);
+        setIceDamage(options.iceDamage);
         setLeaveDamage(options.leaveDamage);
         setTreasureHeal(options.treasureHeal);
         setBoardSize(options.boardSize);
+        setStartPos(options.startPos);
+        setStartDir(options.startDir);
         setRevealTiles(options.revealTiles);
         setTiles({...tiles, ...options.tiles});
+        setTreasuresNeeded(options.treasuresNeeded);
+        setTopPlayed(options.topPlayed);
         setHandSize(options.handSize);
+        setMinPlayed(options.minPlayed);
+        setMaxPlayed(options.maxPlayed);
         setCards({...cards, ...options.cards});
         setVotingAnonymity(options.votingAnonymity);
         setMode(options.mode);
@@ -331,9 +338,9 @@ function MatchOptions(props) {
                 updateOptions();
                 sendUpdate();
             }}>Reset to defaults</Button>
-            {props.started ? null : <Button color={props.editable ? 'secondary' : 'default'} size="small" disabled={!props.editable} onClick={() => {
+            <Button color="secondary" size="small" onClick={() => {
                 presetLoader(props);
-            }}>Save/Load preset</Button>}
+            }}>Save/Load preset</Button>
             <Divider style={{marginTop: 16}} />
 
             <FormControl className={classes.formControl}>
@@ -741,8 +748,9 @@ function PresetLoader(props) {
             onChange={e => setEnteredOptions(e.target.value)}
             helperText="Paste your options code here and click Load to load it"
             variant="outlined"
+            disabled={!props.editable}
         />
-        <Button color="primary" onClick={() => {
+        <Button color={props.editable ? 'primary' : 'default'} disabled={!props.editable} onClick={() => {
             try {
                 options = {...options, ...JSON.parse(atob(enteredOptions))};
                 showMatchOptions(props);
