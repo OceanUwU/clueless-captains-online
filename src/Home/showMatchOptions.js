@@ -30,22 +30,49 @@ const tilesAvailable = [ //[name:string, at least 1 required:boolean]
     ['iceberg', false],
 ];
 const cardsAvailable = [ //[name:string, non-removable:boolean]
-    ['e1', true],
-    ['e2', true],
-    ['e3', true],
-    ['e4', true],
     ['n1', true],
     ['n2', true],
     ['n3', true],
     ['n4', true],
+    ['ne1', true],
+    ['ne2', true],
+    ['ne3', true],
+    ['ne4', true],
+    ['e1', true],
+    ['e2', true],
+    ['e3', true],
+    ['e4', true],
+    ['se1', true],
+    ['se2', true],
+    ['se3', true],
+    ['se4', true],
     ['s1', true],
     ['s2', true],
     ['s3', true],
     ['s4', true],
+    ['sw1', true],
+    ['sw2', true],
+    ['sw3', true],
+    ['sw4', true],
     ['w1', true],
     ['w2', true],
     ['w3', true],
     ['w4', true],
+    ['nw1', true],
+    ['nw2', true],
+    ['nw3', true],
+    ['nw4', true],
+    ['forward1', true],
+    ['forward2', true],
+    ['forward3', true],
+    ['forward4', true],
+    ['turnl1', true],
+    ['turnl2', true],
+    ['turnl3', true],
+    ['turnr1', true],
+    ['turnr2', true],
+    ['turnr3', true],
+    ['flip', true],
     ['persist', true],
     ['relocate', true],
     ['compass1', true],
@@ -70,7 +97,7 @@ var options = {
 };
 
 for (let i in options) {
-    if (typeof options[i] == 'object')
+    if (typeof options[i] == 'object' && !Array.isArray(options[i]))
         options[i] = {
             ...localStorage.MatchOptions ? JSON.parse(localStorage.MatchOptions)[i] : {},
             ...options[i]
@@ -165,6 +192,21 @@ function MatchOptions(props) {
         options.boardSize = event.target.value;
         setBoardSize(event.target.value);
         resetTiles();
+        options.startPos = [Math.round((options.boardSize-1)/2), Math.round((options.boardSize-1)/2)];
+        setStartPos([...options.startPos]);
+        sendUpdate();
+    };
+    console.log(options)
+    const [startPos, setStartPos] = React.useState([...options.startPos]);
+    const changeStartPos = (value, axis) => {
+        options.startPos[axis] = value;
+        setStartPos([...options.startPos]);
+        sendUpdate();
+    };
+    const [startDir, setStartDir] = React.useState(options.startDir);
+    const handleStartDirChange = event => {
+        options.startDir = event.target.value;
+        setStartDir(event.target.value);
         sendUpdate();
     };
     const [revealTiles, setRevealTiles] = React.useState(options.revealTiles);
@@ -390,7 +432,7 @@ function MatchOptions(props) {
                 >
                     {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(n => <MenuItem key={n} value={n}>{n}x{n} ({n*n} tiles)</MenuItem>)}
                 </Select>
-                <Typography>Changing this will also reset the amounts of each type of tile.</Typography>
+                <Typography>Changing this will also reset the amounts of each type of tile and the ship's starting location.</Typography>
                 {/*<FormHelperText>Width x Height</FormHelperText>*/}
             </FormControl>
             {/*<span style={{
@@ -405,6 +447,78 @@ function MatchOptions(props) {
                     {[...Array(allowedPlayersMax+1).keys()].slice(allowedPlayersMin).map(i => <MenuItem value={i}>{i}</MenuItem>)}
                 </Select>
             </FormControl>*/}
+
+            <Divider />
+
+            <FormControl className={classes.formControl}>
+                <FormLabel>Ship starting location</FormLabel>
+            </FormControl>
+            <br />
+            <FormControl className={classes.formControl}>
+                <Select
+                    value={startPos[1]}
+                    onChange={e => changeStartPos(e.target.value, 1)}
+                    displayEmpty
+                    className={classes.smallSelect}
+                    disabled={!props.editable}
+                >
+                    {Array(boardSize).fill(null).map((i, e) => e).map(n => <MenuItem key={n} value={n}>{n+1}</MenuItem>)}
+                </Select>
+                <FormHelperText>X</FormHelperText>
+            </FormControl>
+            <span style={{
+                position: 'relative',
+                top: 0,
+                fontSize: 35,
+            }}>, </span>
+            <FormControl className={classes.formControl}>
+                <Select
+                    value={startPos[0]}
+                    onChange={e => changeStartPos(e.target.value, 0)}
+                    displayEmpty
+                    className={classes.smalSelect}
+                    disabled={!props.editable}
+                >
+                    {Array(boardSize).fill(null).map((i, e) => e).map(n => <MenuItem key={n} value={n}>{n+1}</MenuItem>)}
+                </Select>
+                <FormHelperText>Y</FormHelperText>
+            </FormControl>
+
+            <Divider />
+
+            <FormControl className={classes.formControl}>
+                <FormLabel>Ship starting direction</FormLabel>
+                <Select
+                    value={startDir}
+                    onChange={handleStartDirChange}
+                    disabled={!props.editable}
+                >
+                    <MenuItem value={0}>Random (Any)</MenuItem>
+                    <MenuItem value={1}>Random (Straight)</MenuItem>
+                    <MenuItem value={2}>Random (Diagonal)</MenuItem>
+                    <MenuItem value={3}>N</MenuItem>
+                    <MenuItem value={4}>NE</MenuItem>
+                    <MenuItem value={5}>E</MenuItem>
+                    <MenuItem value={6}>SE</MenuItem>
+                    <MenuItem value={7}>S</MenuItem>
+                    <MenuItem value={8}>SW</MenuItem>
+                    <MenuItem value={9}>W</MenuItem>
+                    <MenuItem value={10}>NW</MenuItem>
+                </Select>
+                <FormHelperText>{(() => ({
+                    0: 'Ship can start facing any direction',
+                    1: 'Ship can start facing any of the following directions: N, E, S, W',
+                    2: 'Ship can start facing any of the following directions: NE, SE, SW, NW',
+                    3: '↑',
+                    4: '↗',
+                    5: '→',
+                    6: '↘',
+                    7: '↓',
+                    8: '↙',
+                    9: '←',
+                    10: '↖',
+                }[startDir]))()}</FormHelperText>
+            </FormControl>
 
             <Divider />
 

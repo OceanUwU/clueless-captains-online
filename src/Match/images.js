@@ -1,6 +1,10 @@
 const images = {
     tiles : {},
-    ship: new Image(),
+    ship: Array(36).fill(null).map((e, i) => {
+        let img = new Image();
+        img.src = `/ship/${i}.png`
+        return img;
+    }),
 };
 
 for (let i of ['unknown', 'water', 'treasure', 'rock', 'iceberg', 'blank']) {

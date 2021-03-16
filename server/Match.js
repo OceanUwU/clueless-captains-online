@@ -45,6 +45,8 @@ class Match {
         this.leaveDamage = options.leaveDamage;
         this.treasureHeal = options.treasureHeal;
         this.boardSize = options.boardSize;
+        this.startPos = options.startPos;
+        this.startDir = options.startDir;
         this.revealTiles = options.revealTiles;
         this.tiles = options.tiles;
         this.treasuresNeeded = options.treasuresNeeded;
@@ -88,6 +90,8 @@ class Match {
                 leaveDamage: this.leaveDamage,
                 treasureHeal: this.treasureHeal,
                 boardSize: this.boardSize,
+                startPos: this.startPos,
+                startDir: this.startDir,
                 revealTiles: this.revealTiles,
                 tiles: this.tiles,
                 treasuresNeeded: this.treasuresNeeded,
@@ -201,11 +205,16 @@ class Match {
 
         //shuffle tiles + set up board
         let nonWaterTiles = Object.keys(this.tiles).map(tile => Array(this.tiles[tile]).fill(tile));
-        this.centre = Math.round((this.boardSize-1)/2);
-        this.ship = [this.centre, this.centre];
+        this.ship = [...this.startPos];
+        switch (this.startDir) {
+            case 0: this.dir = Math.floor(Math.random() * 8); break;
+            case 1: this.dir = Math.floor(Math.random() * 4) * 2; break;
+            case 2: this.dir = 1 + (Math.floor(Math.random() * 4) * 2); break;
+            default: this.dir = this.startDir - 3;
+        }
         this.HP = this.startHP;
         let tiles = shuffleArray([].concat.apply([], [...nonWaterTiles, Array(((this.boardSize**2)-1)-nonWaterTiles.reduce((a,b)=>(typeof a == 'object' ? a.length : a)+b.length)).fill('water')]));
-        tiles.splice(this.boardSize*this.centre+this.centre, 0, 'water');
+        tiles.splice(this.boardSize*this.startPos[0]+this.startPos[1], 0, 'water');
         this.board = [];
         for (let y = 0; y < this.boardSize; y++) {
             let row = [];
@@ -214,7 +223,7 @@ class Match {
             this.board.push(row);
         }
         this.revealed = Array(this.boardSize).fill(null).map(e => Array(this.boardSize).fill(this.revealTiles));
-        this.revealed[this.centre][this.centre] = true; //boat spawn tile is revealed
+        this.revealed[this.startPos[0]][this.startPos[1]] = true; //boat spawn tile is revealed
 
         //make+shuffle deck
         this.drawPile = shuffleArray([].concat.apply([], Object.entries(this.cards).map(card => Array(card[1]).fill(card[0]))));
@@ -278,6 +287,7 @@ class Match {
             })),
             options: this.matchInfo().options,
             ship: this.ship,
+            dir: this.dir,
             board: this.board.map((row, y) => row.map((tile, x) => this.revealed[y][x] ? tile : 'unknown')),
         };
         Object.values(this.players).forEach(player => {
@@ -404,19 +414,30 @@ class Match {
                     discard = false;
                     card = this.lastMovement;
                 }
-            case /\b[nsew]{1}[1234]{1}\b/.test(card):
+            case /forward[1234]{1}/.test(card):
+                if (!(/\b[nesw]{1}[1234]{1}\b/.test(card))) {
+                    for (let i = 0; i < Number(card[card.length-1]); i++)
+                        if (!(await this.moveShip(1))) return;
+                    break;
+                }
+            case /\b[nesw]{1,2}[1234]{1}\b/.test(card):
                 this.lastMovement = card;
-                for (let i = 0; i < Number(card[1]); i++)
-                    if (!(await this.moveShip({
-                        s: [1, 0],
-                        n: [-1, 0],
-                        e: [0, 1],
-                        w: [0, -1]
-                    }[card[0]]))) return;
+                this.dir = ['n','ne','e','se','s','sw','w','nw'].indexOf(card.slice(0, -1));
+                io.to(this.code).emit('dir', this.dir);
+                for (let i = 0; i < Number(card[card.length-1]); i++)
+                    if (!(await this.moveShip(1))) return;
+                break;
+            case /turn[lr]{1}[123]{1}/.test(card):
+                this.dir = ((this.dir + ((card[4] == 'r' ? 1 : -1) * Number(card[5])))+8)%8;
+                io.to(this.code).emit('dir', this.dir);
+                break;
+            case 'flip' == card:
+                this.dir = (this.dir+4)%8;
+                io.to(this.code).emit('dir', this.dir);
                 break;
             case 'relocate' == card:
-                this.ship = [this.centre, this.centre];
-                if (!(await this.moveShip([0,0], 1))) return;
+                this.ship = [...this.startPos];
+                if (!(await this.moveShip(0))) return;
                 break;
             
             //compass cards
@@ -479,16 +500,18 @@ class Match {
         this.playCards();
     }
 
-    moveShip(direction) {
+    moveShip(mult) {
         return new Promise(res => {
             //move ship
-            this.ship[0] += direction[0];
-            this.ship[1] += direction[1];
+            let direction = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]][this.dir];
+            this.ship[0] += direction[0]*mult;
+            this.ship[1] += direction[1]*mult;
 
             //if ship tried to leave board
             if (this.ship[0] >= this.boardSize || this.ship[0] < 0 || this.ship[1] >= this.boardSize || this.ship[1] < 0) { //if ship is out of bounds
-                this.ship = this.ship.map(c => Math.min(Math.max(c, 0), this.boardSize - 1)); //put it back in bounds
-                this.damageShip(this.leaveDamage);
+                this.ship[0] -= direction[0]*mult; //undo the move
+                this.ship[1] -= direction[1]*mult;
+                this.damageShip(this.leaveDamage); //damage it
             } else {
                 io.to(this.code).emit('move', this.ship);
                 this.revealTile(this.ship[0], this.ship[1]);

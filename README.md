@@ -18,4 +18,4 @@ demo: [cc.ocean.lol](https://cc.ocean.lol)
         "codeLength": 4
     }
     ```
-3. `npm start`
+3. `npm start` (or `cd server` then `nodemon` for development)

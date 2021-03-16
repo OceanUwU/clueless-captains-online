@@ -17,22 +17,49 @@ const requiredTiles = tiles.filter(tile => tile[1]).map(tile => tile[0]);
 const topPlayedAllowed = [0, 3];
 const handSizeAllowed = [2, 5];
 const cards = [
-    ['e1', true],
-    ['e2', true],
-    ['e3', true],
-    ['e4', true],
     ['n1', true],
     ['n2', true],
     ['n3', true],
     ['n4', true],
+    ['ne1', true],
+    ['ne2', true],
+    ['ne3', true],
+    ['ne4', true],
+    ['e1', true],
+    ['e2', true],
+    ['e3', true],
+    ['e4', true],
+    ['se1', true],
+    ['se2', true],
+    ['se3', true],
+    ['se4', true],
     ['s1', true],
     ['s2', true],
     ['s3', true],
     ['s4', true],
+    ['sw1', true],
+    ['sw2', true],
+    ['sw3', true],
+    ['sw4', true],
     ['w1', true],
     ['w2', true],
     ['w3', true],
     ['w4', true],
+    ['nw1', true],
+    ['nw2', true],
+    ['nw3', true],
+    ['nw4', true],
+    ['forward1', true],
+    ['forward2', true],
+    ['forward3', true],
+    ['forward4', true],
+    ['turnl1', true],
+    ['turnl2', true],
+    ['turnl3', true],
+    ['turnr1', true],
+    ['turnr2', true],
+    ['turnr3', true],
+    ['flip', true],
     ['persist', true],
     ['relocate', true],
     ['compass1', true],
@@ -122,6 +149,11 @@ let optionsValid = options => (
     && Number.isInteger(options.boardSize)
     && options.boardSize >= boardSizeAllowed[0]
     && options.boardSize <= boardSizeAllowed[1]
+    && Array.isArray(options.startPos)
+    && options.startPos.every((i, e) => Number.isInteger(i) && i >= 0 && i < options.boardSize)
+    && Number.isInteger(options.startDir)
+    && options.startDir >= 0
+    && options.startDir <= 10
     && typeof options.revealTiles == 'boolean'
     && typeof options.tiles == 'object'
     && Object.keys(options.tiles).length == tiles.length //there are the right amount of tile type valuess

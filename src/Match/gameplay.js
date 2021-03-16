@@ -28,6 +28,7 @@ var HP;
 
 var tilesChanging = [];
 var movement = null;
+var direction = null;
 var textNotifs = [];
 
 var canvas;
@@ -90,16 +91,25 @@ function renderBoard() {
     cttd.forEach(i => tilesChanging.splice(i, 1));
     
     //draw ship
-    if (movement != null) {
+    if (movement != null) { //move ship
         if (movement.progress == 1) movement = null;
         else {
             movement.progress = Math.min(1, movement.progress+((1000/boardFPS)/movement.time));
             matchInfo.ship = movement.from.map((a, index) => a+((movement.to[index]-a)*movement.progress));
         }
     }
+    if (direction != null) { //turn ship
+        if (direction.progress == 1) direction = null;
+        else {
+            direction.progress = Math.min(1, direction.progress+((1000/boardFPS)/direction.time));
+            matchInfo.dir = direction.from + (direction.diff * direction.progress);
+            console.log(matchInfo.dir);
+        }
+    }
     ctx.globalAlpha = 1;
-    if (images.ship.complete)
-        ctx.drawImage(images.ship, (gridlineSize+boxSize)*matchInfo.ship[1]+borderSize, (gridlineSize+boxSize)*matchInfo.ship[0]+borderSize, boxSize, boxSize);
+    let shipImg = images.ship[(Math.round(matchInfo.dir * 4.5)+36)%36];
+    if (shipImg.complete)
+        ctx.drawImage(shipImg, (gridlineSize+boxSize)*matchInfo.ship[1]+borderSize, (gridlineSize+boxSize)*matchInfo.ship[0]+borderSize, boxSize, boxSize);
 
     //draw text notifications
     ctx.textAlign = 'center';
@@ -147,6 +157,15 @@ function move(location) {
         to: location,
         progress: 0,
         time: 750,
+    };
+}
+
+function turn(to) {
+    direction = {
+        from: matchInfo.dir,
+        diff: (4 - Math.abs(Math.abs(to - matchInfo.dir) - 4)) * (((to - matchInfo.dir + 8) % 8) > 4 ? -1 : 1), 
+        progress: 0,
+        time: 400,
     };
 }
 
@@ -225,6 +244,7 @@ function endMatch(results, rjCode) {
 export {
     playMatch,
     move,
+    turn,
     changeTile,
     changeHP,
     treasureFound,

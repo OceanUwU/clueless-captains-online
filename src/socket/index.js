@@ -92,6 +92,7 @@ socket.on('matchUpdate', matchInfo => {
 
 socket.on('matchStart', matchInfo => gameplay.playMatch(matchInfo, socket.id));
 socket.on('move', location => gameplay.move(location));
+socket.on('dir', dir => gameplay.turn(dir));
 socket.on('reveal', (location, tile) => gameplay.changeTile(location, tile));
 socket.on('changeTile', (location, tile) => gameplay.changeTile(location, tile));
 socket.on('damage', damage => gameplay.changeHP(-damage));

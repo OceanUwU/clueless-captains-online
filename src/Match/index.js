@@ -8,6 +8,7 @@ import showRoleInfo from './showRoleInfo';
 import rules from '../Rules';
 import SettingsIcon from '@material-ui/icons/Settings';
 import DescriptionIcon from '@material-ui/icons/Description';
+import socket from '../socket';
 
 const controllerHeight = '30vh';
 const useStyles = makeStyles({
@@ -68,8 +69,15 @@ function Match(props) {
     const classes = useStyles();
     let selfPlayer = props.players.find(player => props.myId.startsWith(player.id));
 
-    React.useState(() => {
+    const [dir, setDir] = React.useState(props.matchInfo.dir);
+
+    React.useEffect(() => {
         showRoleInfo(props.matchInfo);
+        socket.on('dir', newDir => setDir(newDir));
+
+        return () => {
+            socket.off('dir');
+        };
     }, []);
 
     return (
@@ -137,7 +145,9 @@ function Match(props) {
             </div>
 
             <div className={classes.boardContainer}>
-                <canvas id="gameBoard" className={classes.board} />
+                <Tooltip title={<span style={{fontSize: 30}}>Ship direction: {'↑↗→↘↓↙←↖'[dir]}</span>}>
+                    <canvas id="gameBoard" className={classes.board} />
+                </Tooltip>
             </div>
 
             <Controller height={controllerHeight} matchInfo={props.matchInfo} />
