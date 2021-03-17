@@ -22,7 +22,7 @@ function Cards() {
             <br />
             <Typography variant="h5">Direction movement cards</Typography>
             <img src="/cards/turnl2.png" className={classes.card} />
-            <img src="/cards/flip.png" className={classes.card} />
+            <img src="/cards/turnr4.png" className={classes.card} />
             <img src="/cards/forward2.png" className={classes.card} />
             <Typography>Turning cards turn the ship a specified amount, and forward cards move the ship in whatever direction the ship is facing. The ship is a lot harder to control using these.</Typography>
             <br />
@@ -33,7 +33,7 @@ function Cards() {
             <br />
             <Typography variant="h6">Persist</Typography>
             <img src="/cards/persist.png" className={classes.card} />
-            <Typography>The action of the last (non-special) movement card to be played is performed again. If no other movement cards have been played this turn, the last movement card from previous turns is played.</Typography>
+            <Typography>The action of the last (not including turning or special) movement card to be played is performed again. If no other movement cards have been played this turn, the last movement card from previous turns is played.</Typography>
             <br />
 
             <Typography variant="h5">Compass</Typography>

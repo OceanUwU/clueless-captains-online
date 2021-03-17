@@ -64,7 +64,7 @@ const cards = [
     ['turnr1', true],
     ['turnr2', true],
     ['turnr3', true],
-    ['flip', true],
+    ['turnr4', true],
     ['persist', true],
     ['relocate', true],
     ['compass1', true],

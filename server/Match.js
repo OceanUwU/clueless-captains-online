@@ -428,12 +428,8 @@ class Match {
                     if (!(await this.moveShip(1))) return;
                 }
                 break;
-            case /turn[lr]{1}[123]{1}/.test(card):
+            case /turn[lr]{1}[1234]{1}/.test(card):
                 this.dir = ((this.dir + ((card[4] == 'r' ? 1 : -1) * Number(card[5])))+8)%8;
-                io.to(this.code).emit('dir', this.dir);
-                break;
-            case 'flip' == card:
-                this.dir = (this.dir+4)%8;
                 io.to(this.code).emit('dir', this.dir);
                 break;
             case 'relocate' == card:
