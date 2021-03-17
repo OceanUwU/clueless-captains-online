@@ -12,6 +12,11 @@ const tiles = [
     ['treasure', true],
     ['rock', false],
     ['iceberg', false],
+    ['waves', false],
+    ['storm', false],
+    ['alcohol', false],
+    ['whirlpoolleft', false],
+    ['whirlpoolright', false],
 ];
 const requiredTiles = tiles.filter(tile => tile[1]).map(tile => tile[0]);
 const topPlayedAllowed = [0, 3];

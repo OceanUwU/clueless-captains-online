@@ -28,6 +28,11 @@ const tilesAvailable = [ //[name:string, at least 1 required:boolean]
     ['treasure', true],
     ['rock', false],
     ['iceberg', false],
+    ['waves', false],
+    ['storm', false],
+    ['alcohol', false],
+    ['whirlpoolleft', false],
+    ['whirlpoolright', false],
 ];
 const cardsAvailable = [ //[name:string, non-removable:boolean]
     ['n1', true],

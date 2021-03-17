@@ -26,6 +26,23 @@ function Tiles() {
             <Typography variant="h5">Iceberg</Typography>
             <img src="/tiles/iceberg.png" width={80} />
             <Typography>Same effect as the rock tile, except it breaks and turns into a water tile upon being touched by the ship (after dealing damage, of course).</Typography>
+            <br />
+            <Typography variant="h5">Waves</Typography>
+            <img src="/tiles/waves.png" width={80} />
+            <Typography>Wave tiles push the ship 1 extra tile in the direction it's facing.</Typography>
+            <br />
+            <Typography variant="h5">Storm</Typography>
+            <img src="/tiles/storm.png" width={80} />
+            <Typography>Storm tiles turn the ship to face a random direction then teleports it to a random tile</Typography>
+            <br />
+            <Typography variant="h5">Booze</Typography>
+            <img src="/tiles/alcohol.png" width={80} />
+            <Typography>Booze tiles turn the ship to face a random direction then push it forward 1 tile in that direction.</Typography>
+            <br />
+            <Typography variant="h5">Whirlpools</Typography>
+            <img src="/tiles/whirlpoolleft.png" width={80} />
+            <img src="/tiles/whirlpoolright.png" width={80} />
+            <Typography>Upon touching a whirlpool tile, the ship turns 90° the way the whirlpool is facing.</Typography>
         </div>
     );
 };

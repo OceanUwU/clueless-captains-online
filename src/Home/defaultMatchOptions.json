@@ -14,7 +14,12 @@
     "tiles": {
         "treasure": 5,
         "rock": 10,
-        "iceberg": 0
+        "iceberg": 0,
+        "waves": 0,
+        "storm": 0,
+        "alcohol": 0,
+        "whirlpoolleft": 0,
+        "whirlpoolright": 0
     },
     "treasuresNeeded": 5,
     "handSize": 3,

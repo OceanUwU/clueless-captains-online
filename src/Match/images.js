@@ -7,7 +7,7 @@ const images = {
     }),
 };
 
-for (let i of ['unknown', 'water', 'treasure', 'rock', 'iceberg', 'blank']) {
+for (let i of ['unknown', 'water', 'treasure', 'rock', 'iceberg', 'waves', 'storm', 'alcohol', 'whirlpoolleft', 'whirlpoolright', 'blank']) {
     let src = `/tiles/${i}.png`;
     images.tiles[i] = new Image();
     images.tiles[i].src = src;

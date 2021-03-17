@@ -422,10 +422,11 @@ class Match {
                 }
             case /\b[nesw]{1,2}[1234]{1}\b/.test(card):
                 this.lastMovement = card;
-                this.dir = ['n','ne','e','se','s','sw','w','nw'].indexOf(card.slice(0, -1));
-                io.to(this.code).emit('dir', this.dir);
-                for (let i = 0; i < Number(card[card.length-1]); i++)
+                for (let i = 0; i < Number(card[card.length-1]); i++) {
+                    this.dir = ['n','ne','e','se','s','sw','w','nw'].indexOf(card.slice(0, -1));
+                    io.to(this.code).emit('dir', this.dir);
                     if (!(await this.moveShip(1))) return;
+                }
                 break;
             case /turn[lr]{1}[123]{1}/.test(card):
                 this.dir = ((this.dir + ((card[4] == 'r' ? 1 : -1) * Number(card[5])))+8)%8;
@@ -501,7 +502,7 @@ class Match {
     }
 
     moveShip(mult) {
-        return new Promise(res => {
+        return new Promise(async res => {
             //move ship
             let direction = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]][this.dir];
             this.ship[0] += direction[0]*mult;
@@ -535,6 +536,32 @@ class Match {
                     case 'iceberg':
                         this.damageShip(this.iceDamage);
                         this.changeTile(this.ship[0], this.ship[1], 'water');
+                        break;
+                    case 'waves':
+                        return setTimeout(async () => res(await this.moveShip(1)), 1000);
+                        break;
+                    case 'storm':
+                        return setTimeout(async () => { 
+                            this.dir = Math.floor(Math.random()*8);
+                            io.to(this.code).emit('dir', this.dir);
+                            this.ship = [Math.floor(Math.random()*this.boardSize[0]), Math.floor(Math.random()*this.boardSize[1])];
+                            res(await this.moveShip(0));
+                        }, 1000);
+                        break;
+                    case 'alcohol':
+                        return setTimeout(async () => {
+                            this.dir = Math.floor(Math.random()*8);
+                            io.to(this.code).emit('dir', this.dir);
+                            res(await this.moveShip(1))
+                        }, 1000);
+                        break;
+                    case 'whirlpoolleft':
+                        this.dir = (this.dir - 2 + 8) % 8
+                        io.to(this.code).emit('dir', this.dir);
+                        break;
+                    case 'whirlpoolright':
+                        this.dir = (this.dir + 2 + 8) % 8
+                        io.to(this.code).emit('dir', this.dir);
                         break;
                 }
             }
