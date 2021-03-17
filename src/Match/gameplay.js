@@ -102,7 +102,7 @@ function renderBoard() {
         if (direction.progress == 1) direction = null;
         else {
             direction.progress = Math.min(1, direction.progress+((1000/boardFPS)/direction.time));
-            matchInfo.dir = direction.from + (direction.diff * direction.progress);
+            matchInfo.dir = ((direction.from + (direction.diff * direction.progress)) + 8) % 8;
         }
     }
     ctx.globalAlpha = 1;
