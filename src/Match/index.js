@@ -70,13 +70,16 @@ function Match(props) {
     let selfPlayer = props.players.find(player => props.myId.startsWith(player.id));
 
     const [dir, setDir] = React.useState(props.matchInfo.dir);
+    const [pos, setPos] = React.useState(props.matchInfo.ship);
 
     React.useEffect(() => {
         showRoleInfo(props.matchInfo);
         socket.on('dir', newDir => setDir(newDir));
+        socket.on('move', newPos => setPos(newPos));
 
         return () => {
             socket.off('dir');
+            socket.off('pos');
         };
     }, []);
 
@@ -145,7 +148,9 @@ function Match(props) {
             </div>
 
             <div className={classes.boardContainer}>
-                <Tooltip title={<span style={{fontSize: 30}}>Ship direction: {'↑↗→↘↓↙←↖'[dir]}</span>}>
+                <Tooltip title={<span style={{fontSize: 30, lineHeight: 1.2}}>
+                    {pos[1]+1}, {pos[0]+1} | {['N','NE','E', 'SE', 'S', 'SW', 'W', 'NW'][dir]} ({'↑↗→↘↓↙←↖'[dir]})
+                </span>}>
                     <canvas id="gameBoard" className={classes.board} />
                 </Tooltip>
             </div>
