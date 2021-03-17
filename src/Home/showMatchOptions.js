@@ -281,9 +281,11 @@ function MatchOptions(props) {
         sendUpdate();
     };
     const resetCards = () => {
-        let newCards = {...cards, ...defaultMatchOptions.cards};
-        setCards(newCards);
-        options.cards = {...newCards};
+        if (cardsAvailable.filter(card => card[1]).map(card => options.cards[card[0]]).reduce((a,b)=>a+b) <= options.players*options.handSize+options.topPlayed) {
+            let newCards = {...cards, ...defaultMatchOptions.cards};
+            setCards(newCards);
+            options.cards = {...newCards};
+        }
     };
     const [votingAnonymity, setVotingAnonymity] = React.useState(options.votingAnonymity);
     const handleVotingAnonymityChange = event => {
@@ -369,7 +371,7 @@ function MatchOptions(props) {
                 <FormLabel style={{marginBottom: 5}}>Max players</FormLabel>
                 <NumberTweaker fn={changePlayers} min={allowedPlayers[0]} max={allowedPlayers[1]} state={players} disabled={props.started} bigChange />
             </FormControl>
-            <Typography>Changing this will also reset the amounts of each type of cards. This cannot be changed in the lobby.</Typography>
+            <Typography>Changing this may also reset the amounts of each type of cards. This cannot be changed in the lobby.</Typography>
 
             <Divider />
 
@@ -461,7 +463,7 @@ function MatchOptions(props) {
                 top: 14,
                 fontSize: 16,
             }}>= {boardSize[1] * boardSize[0]} tiles</span>
-            <Typography>Changing this will also reset the amounts of each type of tile and the ship's starting location.</Typography>
+            <Typography>Changing this may also reset the amounts of each type of tile and the ship's starting location.</Typography>
 
             <Divider />
 
@@ -573,7 +575,7 @@ function MatchOptions(props) {
                 <RadioGroup value={topPlayed} onChange={changeTopPlayed} row>
                     {[0, 1, 2, 3].map(n => <FormControlLabel value={n} key={n} control={<Radio color="primary" disabled={!props.editable} />} label={n} />)}
                 </RadioGroup>
-                <Typography>Changing this will also reset the amounts of each type of cards.</Typography>
+                <Typography>Changing this may also reset the amounts of each type of cards.</Typography>
             </FormControl>
 
             <Divider />
@@ -583,7 +585,7 @@ function MatchOptions(props) {
                 <RadioGroup value={handSize} onChange={changeHandSize} row>
                     {[2, 3, 4, 5].map(n => <FormControlLabel value={n} key={n} control={<Radio color="primary" disabled={!props.editable} />} label={n} />)}
                 </RadioGroup>
-                <Typography>Changing this will also reset the amounts of each type of cards. A deck with at least {players*handSize+topPlayed} non-removable cards is required (also changes based on max players and "Cards played from the top of the deck each turn").</Typography>
+                <Typography>Changing this may also reset the amounts of each type of cards. A deck with at least {players*handSize+topPlayed} non-removable cards is required (also changes based on max players and "Cards played from the top of the deck each turn").</Typography>
             </FormControl>
 
             <Divider />
