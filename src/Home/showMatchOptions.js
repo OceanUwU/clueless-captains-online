@@ -78,16 +78,27 @@ const cardsAvailable = [ //[name:string, non-removable:boolean]
     ['turnr2', true],
     ['turnr3', true],
     ['turnr4', true],
+    ['seasickness', true],
     ['persist', true],
     ['relocate', true],
+    ['chaos', true],
+    ['bravery', true],
+    ['compass0', true],
     ['compass1', true],
     ['compass2', true],
+    ['compass3', true],
+    ['compass4', true],
+    ['compass5', true],
+    ['compass6', true],
+    ['compass7', true],
     ['hammer', true],
     ['nail', true],
     ['hammernail', false],
     ['lookout', true],
     ['reinforce', true],
     ['matchstick', true],
+    ['block', true],
+    ['mute', true],
     ['brig', true],
     ['captain', true],
     ['investigate', false],
@@ -348,6 +359,9 @@ function MatchOptions(props) {
             <Button color="secondary" size="small" onClick={() => {
                 presetLoader(props);
             }}>Save/Load preset</Button>
+            <Button color="primary" size="small" onClick={() => {
+                localStorage.MatchOptions = JSON.stringify(options);
+            }}>Save these options</Button>
             <Divider style={{marginTop: 16}} />
 
             <FormControl className={classes.formControl}>
@@ -734,7 +748,6 @@ async function showMatchOptions(props) {
             buttonText: 'Create',
             buttonAction: () => {
                 dialog.handleClose();
-                localStorage.MatchOptions = JSON.stringify(options);
                 socket.emit('createMatch', options);
             }
         }),

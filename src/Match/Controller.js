@@ -97,6 +97,7 @@ function Controller(props) {
     const [cardsLeft, setCardsLeft] = React.useState(1);
     const [vote, setVote] = React.useState(null);
     const [chooseTitle, setChooseTitle] = React.useState('');
+    const [muted, setMuted] = React.useState(false);
     const [messages, setMessages] = React.useState([]);
     const [messageTyped, setMessageTyped] = React.useState('');
     const sendMessage = () => {
@@ -143,6 +144,18 @@ function Controller(props) {
             props.matchInfo.players.find(p => p.num == dead).dead = true;
             setDisplay('chat');
         });
+        socket.on('mute', newMuted => {
+            setMessageTyped('');
+            setMuted(newMuted);
+            if (props.matchInfo.players.find(p => p.dead && socket.id.startsWith(p.id))) {
+                setMuted(true);
+            } else if (newMuted) {
+                showDialog({
+                    title: 'Muted!',
+                    description: 'Someone played a mute card, so no one can talk this turn.'
+                });
+            }
+        });
         socket.on('message', message => {
             setMessages(prevMessages => [...prevMessages, message])
         });
@@ -157,6 +170,7 @@ function Controller(props) {
             socket.off('choosePlayer');
             socket.off('die');
             socket.off('message');
+            socket.off('muted');
         };
     }, []);
 
@@ -249,6 +263,7 @@ function Controller(props) {
                                         maxLength: 99,
                                         onKeyDown: e => {if (e.key == 'Enter') sendMessage()},
                                     }}
+                                    disabled={muted}
                                     endAdornment={
                                         <InputAdornment position="end">
                                             <IconButton

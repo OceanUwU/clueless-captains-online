@@ -33,7 +33,7 @@ function Tiles() {
             <br />
             <Typography variant="h5">Storm</Typography>
             <img src="/tiles/storm.png" width={80} />
-            <Typography>Storm tiles turn the ship to face a random direction then teleports it to a random tile</Typography>
+            <Typography>Storm tiles turn the ship to face a random direction then teleport it to a random tile.</Typography>
             <br />
             <Typography variant="h5">Booze</Typography>
             <img src="/tiles/alcohol.png" width={80} />

@@ -9,6 +9,17 @@ const defaultPlayer = {
     hand: [],
 };
 
+const compasses = [
+    [[-1, 0], [1, 0], [0, -1], [0, 1]],
+    [[-1, -1], [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0]],
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]],
+    [[-1, -1], [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-2, -1], [-2, 0], [-2, 1], [-1, 2], [0, 2], [1, 2], [2, 1], [2, 0], [2, -1], [1, -2], [0, -2], [-1, -2]],
+    [[-2, -2], [-2, -1], [-2, 0], [-2, 1], [-2, 2], [-1, 2], [0, 2], [1, 2], [2, 2], [2, 1], [2, 0], [2, -1], [2, -2], [1, -2], [0, -2], [-1, -2]],
+    [[-2, 0], [-1, 0], [0, 1], [0, 2], [1, 0], [2, 0], [0, -1], [0, -2]],
+    [[-2, -2], [-1, -1], [-2, 2], [-1, 1], [2, 2], [1, 1], [2, -2], [1, -1]],
+    [[-2, -2], [-2, 2], [2, 2], [2, -2]],
+];
+
 function shuffleArray(array) {
     for (var i = array.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
@@ -34,6 +45,7 @@ class Match {
         this.allowVoting = false;
         this.treasuresFound = 0;
         this.captain = null;
+        this.mute = 0;
     }
 
     setOptions(options) {
@@ -222,6 +234,7 @@ class Match {
                 row.push(tiles[y*this.boardSize[1]+x]);
             this.board.push(row);
         }
+        this.originalBoard = JSON.stringify(this.board);
         this.revealed = Array(this.boardSize[0]).fill(null).map(e => Array(this.boardSize[1]).fill(this.revealTiles));
         this.revealed[this.startPos[0]][this.startPos[1]] = true; //boat spawn tile is revealed
 
@@ -322,6 +335,7 @@ class Match {
     startTurn() {
         io.to(this.code).emit('turnNum', ++this.turnNum);
         this.sendLog(`--==<<((|| Turn ${this.turnNum} ||))>>==--`);
+        this.mute = 1;
 
         if (this.drawPile.length < Object.values(this.players).filter(p=>p.playIn <= 0).length*this.handSize+this.topPlayed) { //if there aren't enough cards to deal everyone a hand
             this.sendLog('There weren\'t enough cards in the draw pile to deal everyone a hand, so the discard pile was shuffled into the draw pile.');
@@ -373,6 +387,7 @@ class Match {
                 this.HNUsed = false;
                 this.hammer = false;
                 this.nail = false;
+                this.block = false;
 
                 this.playCards();
             }).bind(this), 1600);
@@ -390,7 +405,10 @@ class Match {
                 io.to(this.code).emit('vote', player.num, player.vote);
             });
             this.allowVoting = true;
-            setTimeout((() => io.to(this.code).emit('discuss', this.currentVote)).bind(this), 4000);
+            setTimeout((() => {
+                io.to(this.code).emit('discuss', this.currentVote);
+                io.to(this.code).emit('mute', (--this.mute) > 0);
+            }).bind(this), 4000);
             if (this.currentVote != null) {
                 this.sendLog(`You're voting for: ${this.currentVote}. At least ${Object.values(this.players).filter(p => !p.dead).length - Object.values(this.players).filter(p => p.role.startsWith('sea')).length} identical votes are needed for anything to happen.`);
             }
@@ -403,92 +421,114 @@ class Match {
         let discard = true;
 
         io.to(this.code).emit('play', card, this.playPile.length);
-
-        switch (true) {
-            //movement cards
-            case 'persist' == card:
-                if (this.lastMovement == null)
-                    break;
-                else {
-                    this.discardPile.push(card);
-                    discard = false;
-                    card = this.lastMovement;
-                }
-            case /forward[1234]{1}/.test(card):
-                if (!(/\b[nesw]{1}[1234]{1}\b/.test(card))) {
-                    for (let i = 0; i < Number(card[card.length-1]); i++)
+        if (!this.block) {
+            switch (true) {
+                //movement cards
+                case 'persist' == card:
+                    if (this.lastMovement == null)
+                        break;
+                    else {
+                        this.discardPile.push(card);
+                        discard = false;
+                        card = this.lastMovement;
+                    }
+                case /forward[1234]{1}/.test(card):
+                    if (!(/\b[nesw]{1}[1234]{1}\b/.test(card))) {
+                        for (let i = 0; i < Number(card[card.length-1]); i++)
+                            if (!(await this.moveShip(1))) return;
+                        break;
+                    }
+                case /\b[nesw]{1,2}[1234]{1}\b/.test(card):
+                    this.lastMovement = card;
+                    for (let i = 0; i < Number(card[card.length-1]); i++) {
+                        this.dir = ['n','ne','e','se','s','sw','w','nw'].indexOf(card.slice(0, -1));
+                        io.to(this.code).emit('dir', this.dir);
                         if (!(await this.moveShip(1))) return;
+                    }
                     break;
-                }
-            case /\b[nesw]{1,2}[1234]{1}\b/.test(card):
-                this.lastMovement = card;
-                for (let i = 0; i < Number(card[card.length-1]); i++) {
-                    this.dir = ['n','ne','e','se','s','sw','w','nw'].indexOf(card.slice(0, -1));
+                case /turn[lr]{1}[1234]{1}/.test(card):
+                    this.dir = ((this.dir + ((card[4] == 'r' ? 1 : -1) * Number(card[5])))+8)%8;
                     io.to(this.code).emit('dir', this.dir);
-                    if (!(await this.moveShip(1))) return;
-                }
-                break;
-            case /turn[lr]{1}[1234]{1}/.test(card):
-                this.dir = ((this.dir + ((card[4] == 'r' ? 1 : -1) * Number(card[5])))+8)%8;
-                io.to(this.code).emit('dir', this.dir);
-                break;
-            case 'relocate' == card:
-                this.ship = [...this.startPos];
-                if (!(await this.moveShip(0))) return;
-                break;
-            
-            //compass cards
-            case /compass[12]{1}/.test(card):
-                [
-                    [[-1, 0], [1, 0], [0, -1], [0, 1]],
-                    [[-1, -1], [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0]],
-                ][Number(card[card.length-1]-1)].forEach(location => this.revealTile(this.ship[0]+location[0], this.ship[1]+location[1]));
-                break;
-
-            
-            //healing cards
-            case 'hammer' == card:
-                this.hammer = true;
-                if (!this.HNUsed && this.nail) {
-                    this.HNUsed = true;
+                    break;
+                case 'seasickness' == card:
+                    this.dir = Math.floor(Math.random()*8);
+                    io.to(this.code).emit('dir', this.dir);
+                    break;
+                case 'relocate' == card:
+                    this.ship = [...this.startPos];
+                    if (!(await this.moveShip(0))) return;
+                    break;
+                case 'chaos' == card:
+                    this.ship = [Math.floor(Math.random()*this.boardSize[0]), Math.floor(Math.random()*this.boardSize[1])];
+                    if (!(await this.moveShip(0))) return;
+                    break;
+                case 'bravery' == card:
+                    let hitSide = false;
+                    while (!hitSide) {
+                        let survived = await this.moveShip(1);
+                        hitSide = (survived == 'side');
+                        if (!survived) return;
+                    }
+                    break;
+                
+                //compass cards
+                case /compass[01234567]{1}/.test(card):
+                    compasses[Number(card[card.length-1])].forEach(location => this.revealTile(this.ship[0]+location[0], this.ship[1]+location[1]));
+                    break;
+    
+                
+                //healing cards
+                case 'hammer' == card:
+                    this.hammer = true;
+                    if (!this.HNUsed && this.nail) {
+                        this.HNUsed = true;
+                        this.healShip(1);
+                    }
+                    break;
+                case 'nail' == card:
+                    this.nail = true;
+                    if (!this.HNUsed && this.hammer) {
+                        this.HNUsed = true;
+                        this.healShip(1);
+                    }
+                    break;
+                case 'hammernail' == card:
                     this.healShip(1);
-                }
-                break;
-            case 'nail' == card:
-                this.nail = true;
-                if (!this.HNUsed && this.hammer) {
-                    this.HNUsed = true;
-                    this.healShip(1);
-                }
-                break;
-            case 'hammernail' == card:
-                this.healShip(1);
-                discard = false;
-                break;
-            case 'lookout' == card:
-                this.lookout = true;
-                break;
-            case 'reinforce' == card:
-                this.reinforced = true;
-                break;
-            
-            //detriment cards
-            case 'matchstick' == card:
-                this.damageShip(1);
-                break;
-
-            //vote cards
-            case voteOrder.includes(card):
-                if (this.currentVote == null) {
-                    this.currentVote = card;
-                    discard = false; //this card is saved as this turn's voting card, so it will be discarded later
-                    io.to(this.code).emit('currentVote', this.currentVote);
-                } else if (voteOrder.indexOf(card) > voteOrder.indexOf(this.currentVote)) {
-                    card = this.currentVote; //the old voting card is discarded instead
-                    this.currentVote = saveCard;
-                    io.to(this.code).emit('currentVote', this.currentVote);
-                }
-                break;
+                    discard = false;
+                    break;
+                case 'lookout' == card:
+                    this.lookout = true;
+                    break;
+                case 'reinforce' == card:
+                    this.reinforced = true;
+                    break;
+                
+                //detriment cards
+                case 'matchstick' == card:
+                    this.damageShip(1);
+                    break;
+                case 'block' == card:
+                    this.block = true;
+                    break;
+                case 'mute' == card:
+                    this.mute = 2;
+                    break;
+    
+                //vote cards
+                case voteOrder.includes(card):
+                    if (this.currentVote == null) {
+                        this.currentVote = card;
+                        discard = false; //this card is saved as this turn's voting card, so it will be discarded later
+                        io.to(this.code).emit('currentVote', this.currentVote);
+                    } else if (voteOrder.indexOf(card) > voteOrder.indexOf(this.currentVote)) {
+                        card = this.currentVote; //the old voting card is discarded instead
+                        this.currentVote = saveCard;
+                        io.to(this.code).emit('currentVote', this.currentVote);
+                    }
+                    break;
+            }
+        } else {
+            this.block = false;
         }
 
         if (discard)
@@ -500,6 +540,7 @@ class Match {
     moveShip(mult) {
         return new Promise(async res => {
             //move ship
+            let hitSide = false;
             let direction = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]][this.dir];
             this.ship[0] += direction[0]*mult;
             this.ship[1] += direction[1]*mult;
@@ -509,6 +550,7 @@ class Match {
                 this.ship[0] -= direction[0]*mult; //undo the move
                 this.ship[1] -= direction[1]*mult;
                 this.damageShip(this.leaveDamage); //damage it
+                hitSide = true;
             } else {
                 io.to(this.code).emit('move', this.ship);
                 this.revealTile(this.ship[0], this.ship[1]);
@@ -568,7 +610,7 @@ class Match {
                 return res(false);
             }
 
-            setTimeout(() => res(true), 1000);
+            setTimeout(() => res(hitSide ? 'side' : true), 1000);
         })
     }
 
@@ -722,6 +764,7 @@ class Match {
                     cause,
                     roles: Object.values(this.players).map(p => ({role: p.role, num: p.num})),
                     board: this.board,
+                    originalBoard: JSON.parse(this.originalBoard),
                 };
                 io.to(this.code).emit('endMatch', results, String(Math.random()).slice(2));
                 Object.values(this.players).forEach(p => {

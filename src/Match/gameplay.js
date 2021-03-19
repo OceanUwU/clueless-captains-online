@@ -231,6 +231,9 @@ function endMatch(results, rjCode) {
             changeTile([y, x], 'blank', 0.2);
             matchInfo.board[y][x] = 'blank';
         }
+        if (results.board[y][x] != results.originalBoard[y][x]) {
+            changeTile([y, x], results.originalBoard[y][x], 0.1);
+        }
     }));
     renderBoard();
 

@@ -29,17 +29,26 @@ function Cards() {
             <Typography variant="h5">Special movement cards</Typography>
             <Typography variant="h6">Relocate</Typography>
             <img src="/cards/relocate.png" className={classes.card} />
-            <Typography>The ship moves back to the centre of the board, where it started the game.</Typography>
+            <Typography>The ship moves back to where it started this match.</Typography>
             <br />
             <Typography variant="h6">Persist</Typography>
             <img src="/cards/persist.png" className={classes.card} />
             <Typography>The action of the last (not including turning or special) movement card to be played is performed again. If no other movement cards have been played this turn, the last movement card from previous turns is played.</Typography>
             <br />
+            <Typography variant="h6">Chaos</Typography>
+            <img src="/cards/chaos.png" className={classes.card} />
+            <Typography>The ship moves to a random location without turning.</Typography>
+            <br />
+            <Typography variant="h6">Bravery</Typography>
+            <img src="/cards/bravery.png" className={classes.card} />
+            <Typography>The ship keeps going forward in the direction it's facing until it gets to the edge of the board, then it will take damage for trying to move out of the board.</Typography>
+            <br />
 
             <Typography variant="h5">Compass</Typography>
+            <img src="/cards/compass0.png" className={classes.card} />
             <img src="/cards/compass1.png" className={classes.card} />
-            <img src="/cards/compass2.png" className={classes.card} />
-            <Typography>When a compass card is played, all tiles that the card specifies are flipped over to be seen. Tiles with effects (e.g. treasure, rock) don't do anything when revealed - the ship must move over them for that to happen.</Typography>
+            <img src="/cards/compass3.png" className={classes.card} />
+            <Typography>When a compass card is played, all tiles that the card specifies (with grey squares) are flipped over to be seen. Tiles with effects (e.g. treasure, rock) don't do anything when revealed - the ship must move over them for that to happen.</Typography>
             <br />
 
             <Typography variant="h5">Healing cards</Typography>
@@ -65,6 +74,14 @@ function Cards() {
             <Typography variant="h6">Matchstick</Typography>
             <img src="/cards/matchstick.png" className={classes.card} />
             <Typography>The ship takes 1 damage upon this card being played.</Typography>
+            <br />
+            <Typography variant="h6">Block</Typography>
+            <img src="/cards/block.png" className={classes.card} />
+            <Typography>The card played after this card (same turn only) will have no effect.</Typography>
+            <br />
+            <Typography variant="h6">Mute</Typography>
+            <img src="/cards/mute.png" className={classes.card} />
+            <Typography>When this card is played, no one can talk during that turn's discussion or voting phase.</Typography>
             <br />
 
             <Typography variant="h5">Voting</Typography>

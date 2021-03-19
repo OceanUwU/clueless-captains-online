@@ -65,16 +65,27 @@ const cards = [
     ['turnr2', true],
     ['turnr3', true],
     ['turnr4', true],
+    ['seasickness', true],
     ['persist', true],
     ['relocate', true],
+    ['chaos', true],
+    ['bravery', true],
+    ['compass0', true],
     ['compass1', true],
     ['compass2', true],
+    ['compass3', true],
+    ['compass4', true],
+    ['compass5', true],
+    ['compass6', true],
+    ['compass7', true],
     ['hammer', true],
     ['nail', true],
     ['hammernail', false],
     ['lookout', true],
     ['reinforce', true],
     ['matchstick', true],
+    ['block', true],
+    ['mute', true],
     ['brig', true],
     ['captain', true],
     ['investigate', false],
@@ -301,7 +312,7 @@ io.on('connection', socket => {
     });
 
     socket.on('msg', msg => {
-        if (socket.ingame && typeof msg == 'string' && msg.length > 0 && msg.length <= 99 && !matches[socket.ingame].players[socket.id].dead) {
+        if (socket.ingame && typeof msg == 'string' && msg.length > 0 && msg.length <= 99 && !matches[socket.ingame].players[socket.id].dead && matches[socket.ingame].mute <= 0) {
             io.to(socket.ingame).emit('message', {m: msg, p: matches[socket.ingame].players[socket.id].num});
         }
     });
