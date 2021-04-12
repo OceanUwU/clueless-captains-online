@@ -4,6 +4,7 @@ const nameWords = require('./nameWords.js');
 
 const voteOrder = ['brig', 'captain', 'investigate', 'mutiny'];
 const defaultPlayer = {
+    connected: true,
     dead: false,
     playIn: 0,
     hand: [],
@@ -77,7 +78,7 @@ class Match {
         return Object.keys(this.players).map(player => {
             let p = {
                 id: player.slice(0,6),
-                name: this.turnNum > 0 ? this.players[player].genName : this.players[player].name,
+                name: this.players[player].name,
                 bot: this.players[player].bot,
             };
             if (fn != null) p = {...p, ...fn(this.players[player])}
@@ -131,7 +132,6 @@ class Match {
             ...JSON.parse(JSON.stringify(defaultPlayer)),
             socket: io.sockets.sockets.get(player),
             name: io.sockets.sockets.get(player).username,
-            bot: false,
             difficulty: 1,
         }
         if (Object.keys(this.players).length == 1)
@@ -143,7 +143,7 @@ class Match {
         if (!this.started) {
             delete this.players[player];
             
-            if (Object.keys(this.players).length == 0 || !(Object.values(this.players).some(p => !p.bot))) //if there are no players left (not including bots)
+            if (Object.keys(this.players).length == 0 || !(Object.values(this.players).some(p => p.connected))) //if there are no connected players left
                 delete matches[this.code];
             else {
                 if (!this.players.hasOwnProperty(this.host))
@@ -151,8 +151,8 @@ class Match {
                 this.matchUpdate();
             }
         } else {
-            this.players[player].bot = true;
-            if (!(Object.values(this.players).some(p => !p.bot))) { //if there are no non-bot players left
+            this.players[player].connected = false;
+            if (!(Object.values(this.players).some(p => p.connected))) { //if there are no connected players left
                 if (this.turnNum > 0)
                     this.treasuresFound = Infinity;
                 else
@@ -279,16 +279,15 @@ class Match {
         //give players their names
         switch (this.names) {
             case 0: //normal
-                Object.values(this.players).forEach(player => player.genName = player.name);
                 break;
 
             case 1: //gifted
                 let shuffledNames = shuffleArray(Object.values(this.players).map(player => player.name));
-                Object.values(this.players).forEach((player, index) => player.genName = shuffledNames[index]);
+                Object.values(this.players).forEach((player, index) => player.name = shuffledNames[index]);
                 break;
 
             case 2: //random
-                Object.values(this.players).forEach((player, index) => player.genName = nameWords[index]);
+                Object.values(this.players).forEach((player, index) => player.name = nameWords[index]);
                 break;         
         }
 
@@ -302,6 +301,7 @@ class Match {
             ship: this.ship,
             dir: this.dir,
             board: this.board.map((row, y) => row.map((tile, x) => this.revealed[y][x] ? tile : 'unknown')),
+            code: this.code,
         };
         Object.values(this.players).forEach(player => {
             let startInfo = {
@@ -324,6 +324,7 @@ class Match {
                     break; //no extra info needed
             }
             player.socket.emit('matchStart', startInfo);
+            player.startInfo = JSON.stringify(startInfo);
         });
 
         if (this.ditchGame)
@@ -337,6 +338,7 @@ class Match {
         this.sendLog(`--==<<((|| Turn ${this.turnNum} ||))>>==--`);
         this.mute = 1;
 
+        this.phase = 'choose';
         if (this.drawPile.length < Object.values(this.players).filter(p=>p.playIn <= 0).length*this.handSize+this.topPlayed) { //if there aren't enough cards to deal everyone a hand
             this.sendLog('There weren\'t enough cards in the draw pile to deal everyone a hand, so the discard pile was shuffled into the draw pile.');
             this.drawPile = shuffleArray([...this.drawPile, ...this.discardPile]);
@@ -379,6 +381,7 @@ class Match {
             setTimeout((() => {
                 shuffleArray(this.playPile);
                 io.to(this.code).emit('play', 'blank', this.playPile.length);
+                this.phase = 'play';
         
                 this.currentVote = null;
                 io.to(this.code).emit('currentVote', this.currentVote);
@@ -406,6 +409,7 @@ class Match {
             });
             this.allowVoting = true;
             setTimeout((() => {
+                this.phase = 'discuss';
                 io.to(this.code).emit('discuss', this.currentVote);
                 io.to(this.code).emit('mute', (--this.mute) > 0);
             }).bind(this), 4000);
@@ -689,6 +693,7 @@ class Match {
                                     break;
                                 case 'investigate':
                                     this.sendLog(`${votedP.name} was elected as investigator. This investigate card has been discarded permanently, and the newly elected investigator will now choose someone to discover the role of.`);
+                                    this.phase = 'choosePlayer';
                                     this.chooseOccasion = 'investigate';
                                     this.investigator = voted;
                                     votedP.socket.emit('choosePlayer', 'Who would you like to learn the role of?');
@@ -737,6 +742,7 @@ class Match {
                     setTimeout(this.endTurn.bind(this), 20000);
                     break;
             }
+            this.phase = 'discuss';
             io.to(this.code).emit('discuss', null);
             this.chooseOccasion = null;
         }
@@ -757,6 +763,7 @@ class Match {
                 io.to(this.code).emit('discuss', null);
                 let sm = Object.values(this.players).find(p => p.role == 'seamaster');
                 this.chooseOccasion = 'alliedTraitor';
+                this.phase = 'choosePlayer';
                 sm.socket.emit('choosePlayer', 'Who do you think is the biologist?');
                 this.sendLog(`The pirates have achieved their win condition, but the Sea Master (${sm.name}) is now guessing who the biologist is, and if they guess correctly, the sea monsters will win instead of the pirates.`)
             } else {

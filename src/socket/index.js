@@ -10,6 +10,7 @@ import Connecting from './Connect/ing';
 import ConnectFailed from './Connect/Failed';
 import Home from '../Home';
 import Lobby from '../Lobby';
+import ComeBackMenu from '../Lobby/ComeBackMenu';
 import * as gameplay from '../Match/gameplay';
 import defaultMatchOptions from '../Home/defaultMatchOptions.json';
 import showMatchOptions from '../Home/showMatchOptions';
@@ -91,6 +92,7 @@ socket.on('matchUpdate', matchInfo => {
 });
 
 socket.on('matchStart', matchInfo => gameplay.playMatch(matchInfo, socket.id));
+socket.on('comebackchoice', (choices, code) => ReactDOM.render(<ThemeProvider theme={theme}><CssBaseline /><ComeBackMenu choices={choices} code={code} /></ThemeProvider>, document.getElementById('root')));
 socket.on('move', location => gameplay.move(location));
 socket.on('dir', dir => gameplay.turn(dir));
 socket.on('reveal', (location, tile) => gameplay.changeTile(location, tile));

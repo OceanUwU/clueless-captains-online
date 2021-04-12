@@ -231,11 +231,19 @@ io.on('connection', socket => {
     socket.on('joinMatch', code => {
         if (typeof code == 'string' && matches.hasOwnProperty(code.toUpperCase())) {
             let match = matches[code.toUpperCase()];
-            if (Object.keys(match.players).length < match.maxPlayers) {
+            if (Object.keys(match.players).length < match.maxPlayers || match.started) {
                 if (!match.started)
                     joinMatch(match, socket);
-                else
-                    socket.emit('err', ':(', 'That match has already started.');
+                else {
+                    let disconnected = Object.values(match.players).filter(p => !p.connected);
+                    if (disconnected.length > 0) {
+                        socket.emit('comebackchoice', disconnected.map(p => ({
+                            name: p.name,
+                            num: p.num,
+                        })), match.code);
+                    } else
+                        socket.emit('err', ':(', 'That match has already started.');
+                }
             } else
                 socket.emit('err', `It's reached its ${match.maxPlayers} player limit, and no more players can join.`, 'That match is full.');
         } else
@@ -248,6 +256,74 @@ io.on('connection', socket => {
             joinMatch(matchesAvailable[Math.floor(Math.random()*matchesAvailable.length)], socket);
         else
             socket.emit('noMatches');
+    });
+
+    socket.on('comeback', (num, code) => {
+        if (!socket.ingame && Number.isInteger(num) && typeof code == 'string') {
+            let match = matches[code];
+            if (!match) return socket.emit('err', 'This match is no longer available to join.', 'Too late');
+            let player = Object.values(match.players).find(p => p.num == num);
+            if (!player || player.connected) return socket.emit('err', 'You can no longer join as this player.', 'Too late');
+            match.players[socket.id] = player;
+            delete match.players[player.socket.id];
+            match.players[socket.id].socket = socket;
+            match.players[socket.id].connected = true;
+            socket.ingame = match.code;
+            socket.join(match.code);
+            let players = match.playerInfo(p => ({
+                dead: p.dead,
+                num: p.num,
+            }));
+            socket.emit('matchStart', {
+                ...JSON.parse(player.startInfo),
+                me: players.find(p => p.num == player.num),
+                players,
+                ship: match.ship,
+                dir: match.dir,
+                board: match.board.map((row, y) => row.map((tile, x) => match.revealed[y][x] ? tile : 'unknown')),
+            });
+            setTimeout(() => {
+                match.sendLog(`${player.name} rejoined the game.`);
+
+                socket.emit('turnNum', match.turnNum);
+                for (let i = 0; i < match.treasuresFound; i++)
+                    socket.emit('treasure');
+                socket.emit('damage', match.startHP - match.HP);
+    
+                switch (match.phase) {
+                    case 'choose':
+                        if (player.waitStatus == 0)
+                            socket.emit('cards', player.hand);
+                        else
+                            socket.emit('wait', Object.values(match.players).map(p => ({n: p.num, s: p.waitStatus})));
+                        break;
+                    
+                    case 'play':
+                        io.to(this.code).emit('play', 'back', match.playPile.length);
+                        break;
+                    
+                    case 'choosePlayer':
+                        if (match.chooseOccasion == 'alliedTraitor') {
+                            if (player.role == 'seamaster') {
+                                socket.emit('choosePlayer', 'Who do you think is the biologist?');
+                                break;
+                            }
+                        } else if (match.chooseOccasion == 'investigate') {
+                            if (player.num == match.investigator) {
+                                socket.emit('choosePlayer', 'Who would you like to learn the role of?');
+                                break;
+                            }
+                        }
+                        
+                    case 'discuss':
+                        socket.emit('discuss', match.currentVote);
+                        socket.emit('mute', match.mute > 0);
+                        Object.values(match.players).forEach(p => socket.emit('vote', p.num, match.votingAnonymity == 0 ? p.vote : true));
+                        socket.emit('vote', player.num, player.vote);
+                        break;
+                }
+            }, 1000);
+        }
     });
 
     socket.on('rejoin', (rejoinCode, options) => {

@@ -5,9 +5,11 @@ import Controller from './Controller';
 import './index.css';
 import showMatchOptions from '../Home/showMatchOptions';
 import showRoleInfo from './showRoleInfo';
+import showDialog from '../Dialog/show';
 import rules from '../Rules';
 import SettingsIcon from '@material-ui/icons/Settings';
 import DescriptionIcon from '@material-ui/icons/Description';
+import CodeIcon from '@material-ui/icons/Code';
 import socket from '../socket';
 
 const controllerHeight = '30vh';
@@ -45,15 +47,20 @@ const useStyles = makeStyles({
     },
 
     boardContainer: {
+        maxHeight: `calc(100vh - 83px - ${controllerHeight})`,
+        height: '100vh',
         textAlign: 'center',
         lineHeight: 0,
+        position: 'relative'
     },
 
     board: {
-        maxHeight: `calc(100vh - 83px - ${controllerHeight})`,
-        height: '100vh',
-        maxWidth: '100%',
+        height: '100%',
+        width: '100%',
         objectFit: 'contain',
+        position: 'absolute',
+        top: 0,
+        left: 0,
     },
 
     buttons: {
@@ -62,6 +69,7 @@ const useStyles = makeStyles({
         flexDirection: 'column',
         opacity: 1,
         width: 48,
+        zIndex: 100,
     },
 });
 
@@ -145,13 +153,20 @@ function Match(props) {
                 <rules.ShowRulesButton />
                 <IconButton onClick={() => showRoleInfo(props.matchInfo)}><DescriptionIcon /></IconButton>
                 <IconButton onClick={() => showMatchOptions.showMatchOptions({editable: false, started: true, ingame: true, options: props.matchInfo.options})}><SettingsIcon /></IconButton>
+                <IconButton onClick={() => showDialog({
+                    title: "Room Code",
+                    description: "Players can use this code to rejoin the match if they get disconnected:",
+                }, <Typography variant="h2">{props.matchInfo.code}</Typography>)}><CodeIcon /></IconButton>
             </div>
 
             <div className={classes.boardContainer}>
+                <canvas id="board" style={{
+                }} className={classes.board} />
                 <Tooltip title={<span style={{fontSize: 30, lineHeight: 1.2}}>
                     {pos[1]+1}, {pos[0]+1} | {['N','NE','E', 'SE', 'S', 'SW', 'W', 'NW'][dir]} ({'↑↗→↘↓↙←↖'[dir]})
                 </span>}>
-                    <canvas id="gameBoard" className={classes.board} />
+                    <canvas id="topLayer" style={{
+                    }} className={classes.board} />
                 </Tooltip>
             </div>
 
