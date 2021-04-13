@@ -565,7 +565,7 @@ class Match {
                     case 'treasure':
                         this.treasuresFound++;
                         io.to(this.code).emit('treasure');
-                        this.healShip(this.treasureHeal, false);
+                        this.healShip(this.treasureHeal);
                         this.changeTile(this.ship[0], this.ship[1], 'water');
                         if (this.treasuresFound >= this.treasuresNeeded) {
                             this.endMatch('treasure');
@@ -642,12 +642,11 @@ class Match {
         }
     }
 
-    healShip(amount, broadcast=true) {
+    healShip(amount) {
         this.HP += amount;
         if (this.HP > this.maxHP)
             this.HP = this.maxHP;
-        if (broadcast)
-            io.to(this.code).emit('heal', amount);
+        io.to(this.code).emit('heal', amount);
     }
 
     sendLog(logMessage) {
