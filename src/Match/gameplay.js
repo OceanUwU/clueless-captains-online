@@ -11,8 +11,6 @@ import images from './images';
 const boxSize = 200;
 const gridlineSize = 6;
 const borderSize = 20;
-const boardFPS = 60;
-var renderInterval;
 const gameNameChars = '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const placeAudio = new Audio('/place.mp3');
 const otherPlaceAudio = new Audio('/otherPlace.mp3');
@@ -35,6 +33,7 @@ var canvas;
 var ctx;
 var topCanvas;
 var topCtx;
+var animating = false;
 
 function renderBottom() {
     ctx.globalAlpha = 1;
@@ -79,7 +78,9 @@ function renderBottom() {
         }
 }
 
-function renderBoard() {
+function renderBoard(bypass=false) {
+    if (!(animating || bypass)) return;
+
     topCtx.clearRect(0, 0, topCanvas.width, topCanvas.height);
     let now = Date.now();
 
@@ -130,6 +131,8 @@ function renderBoard() {
     });
     ntd.reverse();
     ntd.forEach(i => textNotifs.splice(i, 1));
+
+    requestAnimationFrame(renderBoard);
 }
 
 function playMatch(startingMatchInfo, sentId) {
@@ -153,7 +156,8 @@ function playMatch(startingMatchInfo, sentId) {
         document.getElementById('maxShipHP').innerHTML = matchInfo.options.maxHP;
 
         renderBottom();
-        renderInterval = setInterval(renderBoard, Math.ceil(1000/boardFPS));
+        animating = true;
+        renderBoard();
         
         (new Audio('/startMatch.mp3')).play();
     });
@@ -223,8 +227,7 @@ function die(num) {
 }
 
 function endMatch(results, rjCode) {
-    clearInterval(renderInterval);
-    renderInterval = null;
+    animating = false;
 
     tilesChanging = [];
     matchInfo.board.forEach((row, y) => row.forEach((tile, x) => {
@@ -238,7 +241,7 @@ function endMatch(results, rjCode) {
         }
     }));
     renderBottom();
-    renderBoard();
+    renderBoard(true);
     console.log(topCanvas.toDataURL());
     ctx.drawImage(topCanvas, 0, 0);
 
