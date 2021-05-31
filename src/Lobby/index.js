@@ -66,8 +66,8 @@ function Lobby(props) {
                         </Tooltip>
                     : null}
                     <span style={i in props.matchInfo.players ? {color:playerColours[props.matchInfo.players[i].num]} : null}>{you ? <span className={classes.you}>{content}</span> : content}</span>
-                    {you ? <Tooltip title="Change your name">
-                        <IconButton size="small" onClick={() => showDialog({title: 'Change your name?'}, <div style={{textAlign: 'center'}}><NameInput /><ColorPicker selected={props.matchInfo.players[i].num} matchInfo={props.matchInfo} /></div>)}><EditIcon fontSize="inherit" /></IconButton>
+                    {you ? <Tooltip title="Customise">
+                        <IconButton size="small" onClick={() => showDialog({title: 'Customisation'}, <div style={{textAlign: 'center'}}><NameInput /><ColorPicker selected={props.matchInfo.players[i].num} matchInfo={props.matchInfo} /></div>)}><EditIcon fontSize="inherit" /></IconButton>
                     </Tooltip> : null}
                     {i in props.matchInfo.players && amHost && !props.matchInfo.starting && !you ? <span>
                         <Tooltip title="Kick - remove this player from this lobby.">
