@@ -11,7 +11,9 @@ import LinkIcon from '@material-ui/icons/Link';
 import EditIcon from '@material-ui/icons/Edit';
 import socket from '../socket';
 import copy from 'clipboard-copy';
+import playerColours from '../Match/playerColours.json';
 import NameInput from '../Home/NameInput';
+import ColorPicker from './ColorPicker';
 import showDialog from '../Dialog/show';
 import showMatchOptions from '../Home/showMatchOptions';
 import rules from '../Rules';
@@ -63,9 +65,9 @@ function Lobby(props) {
                             <StarsIcon fontSize="inherit" />
                         </Tooltip>
                     : null}
-                    {you ? <span className={classes.you}>{content}</span> : content}
+                    <span style={i in props.matchInfo.players ? {color:playerColours[props.matchInfo.players[i].num]} : null}>{you ? <span className={classes.you}>{content}</span> : content}</span>
                     {you ? <Tooltip title="Change your name">
-                        <IconButton size="small" onClick={() => showDialog({title: 'Change your name?'}, <NameInput />)}><EditIcon fontSize="inherit" /></IconButton>
+                        <IconButton size="small" onClick={() => showDialog({title: 'Change your name?'}, <div style={{textAlign: 'center'}}><NameInput /><ColorPicker selected={props.matchInfo.players[i].num} matchInfo={props.matchInfo} /></div>)}><EditIcon fontSize="inherit" /></IconButton>
                     </Tooltip> : null}
                     {i in props.matchInfo.players && amHost && !props.matchInfo.starting && !you ? <span>
                         <Tooltip title="Kick - remove this player from this lobby.">

@@ -79,6 +79,7 @@ class Match {
         return Object.keys(this.players).map(player => {
             let p = {
                 id: player.slice(0,6),
+                num: this.players[player].num,
                 name: this.players[player].name,
                 bot: this.players[player].bot,
             };
@@ -130,15 +131,28 @@ class Match {
     }
 
     join(player) {
+        let numsTaken = Object.values(this.players).map(p => p.num);
+        let numsAvailable = [...Array(16).keys()].filter(n => !numsTaken.includes(n));
+        console.log(numsAvailable);
+        let num = numsAvailable[Math.floor(Math.random() * numsAvailable.length)];
         this.players[player] = {
             ...JSON.parse(JSON.stringify(defaultPlayer)),
             socket: io.sockets.sockets.get(player),
             name: io.sockets.sockets.get(player).username,
+            num,
             difficulty: 1,
         }
         if (Object.keys(this.players).length == 1)
             this.host = Object.keys(this.players)[0];
+        this.setNum(player, this.players[player].socket.num);
         this.matchUpdate();
+    }
+
+    setNum(player, num) {
+        if (Object.values(this.players).every(p => p.num != num) && this.players[player].num != num) { //if no one is already using this number and this number is different to the player's current number
+            this.players[player].num = num;
+            this.matchUpdate();
+        }
     }
 
     leave(player) {
@@ -213,10 +227,6 @@ class Match {
 
     start() {
         this.playersPlaying = Object.keys(this.players).length;
-        let playerNums = shuffleArray([0,1,2,3,4,5,6,7,8,9]);
-        shuffleArray(Object.values(this.players)).forEach((player, index) => {
-            player.num = playerNums[index];
-        });
 
         //shuffle tiles + set up board
         let nonWaterTiles = Object.keys(this.tiles).map(tile => Array(this.tiles[tile]).fill(tile));
@@ -298,7 +308,6 @@ class Match {
         let matchInfo = {
             players: this.playerInfo(p => ({
                 dead: false,
-                num: p.num,
             })),
             options: this.matchInfo().options,
             ship: this.ship,

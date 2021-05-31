@@ -3,10 +3,13 @@ import { Typography, Button, Divider, Link } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import CodeInput from './CodeInput';
 import NameInput from './NameInput';
+import ColorPicker from '../Lobby/ColorPicker';
 import socket from '../socket';
 import showMatchOptions from './showMatchOptions';
 import showDialog from '../Dialog/show';
+import playerColours from '../Match/playerColours.json';
 import rules from '../Rules';
+import { PinDropSharp } from '@material-ui/icons';
 
 const useStyles = makeStyles({
     logoImage: {
@@ -36,6 +39,7 @@ function Home() {
 
             <div className={classes.controls}>
                 <NameInput />
+                <ColorPicker selected={localStorage.cccolor ? Number(localStorage.cccolor) : (() => {localStorage.cccolor = Math.floor(Math.random() * playerColours.length);return localStorage.cccolor})()} matchInfo={null} />
 
                 <Divider />
                 <br />

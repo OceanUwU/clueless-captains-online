@@ -2,6 +2,7 @@ const { SportsCricket } = require('@material-ui/icons');
 const cfg = require('./cfg');
 const maxUsernameLength = 6;
 const allowedUsernameChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 áéíóúÁÉÍÓÚ!"£$€%^&*()-=_+[]{};\'#:@~,./<>?\\|`¬¦';
+const colorsAllowed = [...Array(16).keys()];
 const playersAllowed = [1, 8];
 const HPAllowed = [1, 999];
 const tileDamageAllowed = [1, 4];
@@ -207,7 +208,8 @@ let optionsValid = options => (
 );
 
 io.on('connection', socket => {
-    generateUsername(socket)
+    generateUsername(socket);
+    socket.num = 0;
     socket.ingame = false;
 
     socket.on('changeName', newName => {
@@ -225,6 +227,17 @@ io.on('connection', socket => {
             if (socket.ingame && matches[socket.ingame].turnNum == 0) {
                 matches[socket.ingame].players[socket.id].name = socket.username;
                 matches[socket.ingame].matchUpdate();
+            }
+        }
+    });
+
+    socket.on('changeColor', color => {
+        color = Number(color);
+        if (colorsAllowed.includes(color)) {
+            if (socket.ingame) {
+                matches[socket.ingame].setNum(socket.id, color);
+            } else {
+                socket.num = color;
             }
         }
     });
