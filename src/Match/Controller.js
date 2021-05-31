@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import showDialog from '../Dialog/show';
 import socket from '../socket';
 import playerColours from './playerColours.json';
+import formatText from './formatText';
 
 import ChatIcon from '@material-ui/icons/Chat';
 import CheckIcon from '@material-ui/icons/Check';
@@ -238,13 +239,13 @@ function Controller(props) {
                             {messages.map(msg => {
                                 if (msg.hasOwnProperty('l')) {
                                     return <Typography style={{color: '#858585'}}>
-                                        {msg.l}
+                                        {formatText(msg.l)}
                                     </Typography>;
                                 } else {
                                     return <Typography>
                                         <span style={{color: '#777777'}}>[<span style={{color: playerColours[msg.p]}}>{props.matchInfo.players.find(p => p.num == msg.p).name}</span>]</span>
                                         {' '}
-                                        {msg.m}
+                                        {formatText(msg.m)}
                                     </Typography>;
                                 }
                             })}
