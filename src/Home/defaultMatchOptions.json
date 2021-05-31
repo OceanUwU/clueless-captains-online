@@ -26,6 +26,7 @@
     "minPlayed": 1,
     "maxPlayed": 1,
     "topPlayed": 0,
+    "evilsSeeCards": false,
     "cards": {
         "n1": 4,
         "n2": 2,

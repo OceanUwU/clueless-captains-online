@@ -285,6 +285,12 @@ function MatchOptions(props) {
         resetCards();
         sendUpdate();
     };
+    const [evilsSeeCards, setEvilsSeeCards] = React.useState(options.evilsSeeCards);
+    const evilsSeeCardsChange = event => {
+        options.evilsSeeCards = !evilsSeeCards;
+        setEvilsSeeCards(!evilsSeeCards);
+        sendUpdate();
+    };
     const [cards, setCards] = React.useState(options.cards);
     const changeCards = (change, card) => {
         options.cards[card] += change;
@@ -594,6 +600,14 @@ function MatchOptions(props) {
 
             <Divider />
 
+            <FormControlLabel
+                control={<Checkbox color="primary" checked={evilsSeeCards} onChange={evilsSeeCardsChange} disabled={!props.editable} />}
+                label="Tell sea monsters which cards were played from the top of the deck?"
+                labelPlacement="start"
+            />
+
+            <Divider />
+
             <FormControl className={classes.formControl}>
                 <FormLabel>Cards drawn per hand</FormLabel>
                 <RadioGroup value={handSize} onChange={changeHandSize} row>
@@ -686,7 +700,7 @@ function MatchOptions(props) {
                     <MenuItem value={0}>Sea Sight</MenuItem>
                     <MenuItem value={1}>Sea Blindness</MenuItem>
                     <MenuItem value={2}>Allied Traitor</MenuItem>
-                    <MenuItem value={3}>Undefended</MenuItem>
+                    <MenuItem value={3}>Open Seas</MenuItem>
                 </Select>
                 <FormHelperText>{(() => ({
                     0: 'All Sea Monsters know their teammate (if they have one)',

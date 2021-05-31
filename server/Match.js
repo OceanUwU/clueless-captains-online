@@ -64,6 +64,7 @@ class Match {
         this.tiles = options.tiles;
         this.treasuresNeeded = options.treasuresNeeded;
         this.topPlayed = options.topPlayed;
+        this.evilsSeeCards = options.evilsSeeCards;
         this.handSize = options.handSize;
         this.minPlayed = options.minPlayed;
         this.maxPlayed = options.maxPlayed;
@@ -109,6 +110,7 @@ class Match {
                 tiles: this.tiles,
                 treasuresNeeded: this.treasuresNeeded,
                 topPlayed: this.topPlayed,
+                evilsSeeCards: this.evilsSeeCards,
                 handSize: this.handSize,
                 minPlayed: this.minPlayed,
                 maxPlayed: this.maxPlayed,
@@ -211,8 +213,9 @@ class Match {
 
     start() {
         this.playersPlaying = Object.keys(this.players).length;
+        let playerNums = shuffleArray([0,1,2,3,4,5,6,7,8,9]);
         shuffleArray(Object.values(this.players)).forEach((player, index) => {
-            player.num = index;
+            player.num = playerNums[index];
         });
 
         //shuffle tiles + set up board
@@ -311,18 +314,23 @@ class Match {
             };
             switch (player.role) {
                 case 'pirate':
-                    break; //no extra info needed
+                    player.allegiance = 'pirate';
+                    break;
                 case 'biologist':
+                    player.allegiance = 'pirate';
                     startInfo.roles = Object.values(this.players).map(p => ({num: p.num, role: p.role})); //tell the biologist the roles of everyone
                     break;
                 case 'seamaster': //fallthrough (sea master starts out the same as a sightful sea monster)
                 case 'seamonster':
+                    player.allegiance = 'seamonster';
                     if (this.mode == 0 || this.mode == 2) //if sea monsters should be able to see teammates (or this is the sea master)
                         startInfo.teammate = startInfo.players.find(pl => pl.num == Object.values(this.players).find(p => ((p.num != player.num) && (p.role == 'seamonster' || p.role == 'seaservant'))).num);
                     break;
                 case 'seaservant':
+                    player.allegiance = 'seamonster';
                     break; //no extra info needed
             }
+            startInfo.allegiance = player.allegiance;
             player.socket.emit('matchStart', startInfo);
             player.startInfo = JSON.stringify(startInfo);
         });
@@ -345,8 +353,14 @@ class Match {
             this.discardPile = []; //discard pile has moved to draw pile, so clear it
         }
         this.playPile = this.drawPile.splice(0, this.topPlayed); //play the correct amount of cards from the top of the draw pile
-        if (this.topPlayed > 0)
+        if (this.topPlayed > 0) {
             this.sendLog(`${this.topPlayed} card${this.topPlayed == 1 ? '' : 's'} were played from the top of the draw pile.`);
+            console.log(this.evilsSeeCards, this.players);
+            if (this.evilsSeeCards)
+                for (let player of Object.values(this.players))
+                    if (player.allegiance == 'seamonster')
+                        player.socket.emit('message', {l: `(Only players on the sea monsters' team can see this) The cards played from the top of the draw pile were: ${this.playPile.join(', ')}.`});
+        }
 
         Object.values(this.players).forEach(player => {
             player.cardsPlayed = null;

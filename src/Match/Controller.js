@@ -158,6 +158,7 @@ function Controller(props) {
             }
         });
         socket.on('message', message => {
+            console.log(message);
             setMessages(prevMessages => [...prevMessages, message])
         });
 

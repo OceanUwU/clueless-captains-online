@@ -182,6 +182,7 @@ let optionsValid = options => (
     && Number.isInteger(options.topPlayed)
     && options.topPlayed >= topPlayedAllowed[0]
     && options.topPlayed <= topPlayedAllowed[1]
+    && typeof options.evilsSeeCards == 'boolean'
     && Number.isInteger(options.handSize)
     && options.handSize >= handSizeAllowed[0]
     && options.handSize <= handSizeAllowed[1]
@@ -342,6 +343,7 @@ io.on('connection', socket => {
     });
 
     socket.on('createMatch', options => {
+        console.log(options.evilsSeeCards);
         if (optionsValid(options))
             createMatch(socket, options);
     });
