@@ -239,7 +239,13 @@ function Controller(props) {
                         <div ref={chatRef} className={classes.chat}>
                             {messages.map(msg => {
                                 if (msg.hasOwnProperty('l')) {
-                                    return <Typography style={{color: '#858585'}}>
+                                    let color;
+                                    switch (msg.o) {
+                                        case 's': color = '#ff4f4f';break;
+                                        case 'i': color = '#6bc4ff';break;
+                                        default: color = '#858585';break;
+                                    };
+                                    return <Typography style={{color}}>
                                         {formatText(msg.l)}
                                     </Typography>;
                                 } else {

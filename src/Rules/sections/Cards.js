@@ -97,11 +97,11 @@ function Cards() {
             <br />
             <Typography variant="h6">Investigate</Typography>
             <img src="/cards/investigate.png" className={classes.card} />
-            <Typography>If someone gets enough votes, they can choose another player to find out the role of. This card is permanently discarded if a player is successfully investigated.</Typography>
+            <Typography>If someone gets enough votes, they can choose another player to find out the team (pirate or sea monster) of. This card is permanently discarded if a player is successfully investigated.</Typography>
             <br />
             <Typography variant="h6">Mutiny</Typography>
             <img src="/cards/mutiny.png" className={classes.card} />
-            <Typography>If someone gets enough votes, they're forced off the ship and cannot play cards, talk, vote, or receive votes for the rest of the game. If this player was a sea monster, the pirates win. This card is permanently discarded if a player is successfully mutinied.</Typography>
+            <Typography>If someone gets enough votes, they're forced off the ship and cannot play cards, talk, vote, or receive votes for the rest of the game. If this player was on the sea monsters' team, the pirates win. This card is permanently discarded if a player is successfully mutinied.</Typography>
         </div>
     );
 };

@@ -359,7 +359,7 @@ class Match {
             if (this.evilsSeeCards)
                 for (let player of Object.values(this.players))
                     if (player.allegiance == 'seamonster')
-                        player.socket.emit('message', {l: `(Only players on the sea monsters' team can see this) The cards played from the top of the draw pile were: ${this.playPile.join(', ')}.`});
+                        player.socket.emit('message', {l: `The cards played from the top of the draw pile were: ${this.playPile.join(', ')}.`, o: 's'});
         }
 
         Object.values(this.players).forEach(player => {
@@ -750,8 +750,8 @@ class Match {
 
                 case 'investigate':
                     if (chooser.num != this.investigator) return;
-                    this.sendLog(`${chooser.name} investigated ${player.name}, and has been sent their role. You now have ${Math.round(20000/1000)} seconds to discuss before the next turn starts.`);
-                    chooser.socket.emit('message', {l: `(ONLY YOU CAN SEE THIS) ${player.name}'s role is: ${player.role}`});
+                    this.sendLog(`${chooser.name} investigated ${player.name}, and has been sent the name of their team. You now have ${Math.round(20000/1000)} seconds to discuss before the next turn starts.`);
+                    chooser.socket.emit('message', {l: `${player.name}'s team is: ${player.allegiance}`, o: 'i'});
                     setTimeout(this.endTurn.bind(this), 20000);
                     break;
             }

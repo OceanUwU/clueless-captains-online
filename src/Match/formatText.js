@@ -29,7 +29,7 @@ export default function formatText(text) {
                         <h4 style={{textAlign: 'center'}}>{typeNames[typeFound]}</h4>
                         <img src={`/${typeFound}/${hashtag}.${publicDir[typeFound][hashtag]}`} width={80} style={{borderRadius:4}} />
                     </span>} PopperProps={{style: {zIndex: 100000}}}>
-                        <span>{space}<Link color="secondary">{word}</Link></span>
+                        <span>{space}<Link style={{color: '#03a1fc'}}>{word}</Link></span>
                     </Tooltip>);
             //}
             return `${space}${word}`;

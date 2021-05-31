@@ -39,8 +39,7 @@ const useStyles = makeStyles({
     },
 
     you: {
-        color: 'red',
-        fontWeight: 'bold',
+        textDecoration: 'underline',
     },
 });
 
