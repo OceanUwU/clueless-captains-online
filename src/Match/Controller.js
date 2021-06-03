@@ -301,10 +301,11 @@ function Controller(props) {
                                         <div style={{background: playerColours[player.num], width: '100%'}}>
                                         <span style={{textDecoration: `${player.dead ? 'line-through' : ''} ${socket.id.startsWith(player.id) ? 'underline' : ''}`}}>{player.name}</span>
                                         </div>
-                                        <span style={{borderLeft: '1px solid #0000001f', fontSize: 0, padding: 8, background: ((votes[player.num] == null || votes[player.num] == null == true) ? 'white' : playerColours[votes[player.num]])}}>{votes[player.num] == null ? (player.dead ? <CloseIcon style={{color: 'black'}} /> : <MoreHorizIcon style={{color: 'black'}} />) : <CheckIcon style={{color: votes[player.num] === true ? 'black' : 'white'}} />}</span>
+                                        <span style={{borderLeft: '1px solid #0000001f', fontSize: 0, padding: 8, background: ((votes[player.num] === null || votes[player.num] === null == true) ? 'white' : playerColours[votes[player.num]])}}>{votes[player.num] == null || votes[player.num] == false ? (player.dead || votes[player.num] === false ? <CloseIcon style={{color: 'black'}} /> : <MoreHorizIcon style={{color: 'black'}} />) : <CheckIcon style={{color: votes[player.num] === true ? 'black' : 'white'}} />}</span>
                                     </div>
                                 </Tooltip>;
                             })}
+                            <span style={{width: '100%', display: 'flex', justifyContent: 'center'}}><Tooltip title="Vote for no one"><Button onClick={() => socket.emit('vote', false)} variant="contained" size="small" disableElevation>Abstain</Button></Tooltip></span>
                         </div>
                     </div>);
 

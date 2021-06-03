@@ -421,7 +421,7 @@ io.on('connection', socket => {
     socket.on('vote', num => {
         if (socket.ingame) {
             let match = matches[socket.ingame];
-            if (match.allowVoting && Object.values(match.players).some(p => p.num === num && !p.dead) && !match.players[socket.id].dead)
+            if (match.allowVoting && (num === false || (Object.values(match.players).some(p => p.num === num && !p.dead) && !match.players[socket.id].dead)))
                 match.vote(socket.id, num);
         }
     });
