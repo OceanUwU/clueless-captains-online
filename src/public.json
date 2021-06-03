@@ -102,6 +102,9 @@
     "ship": "png",
     "shipPlain": "png",
     "startMatch": "mp3",
+    "terms": {
+        "compass": "png"
+    },
     "tiles": {
         "alcohol": "png",
         "blank": "png",

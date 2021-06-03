@@ -8,6 +8,7 @@ const typeNames = {
     'roles': 'Role',
     'tiles': 'Tile',
     'directions': 'Direction',
+    'terms': 'Term'
 };
 const types = Object.keys(typeNames);
 const colourOverrides = [
@@ -19,6 +20,12 @@ const colourOverrides = [
     [/^s\d+$/, '#bbb500'],
     [/^west$/, '#0100fc'],
     [/^w\d+$/, '#0100fc'],
+    [/pirate/, '#00ff00'],
+    [/biologist/, '#00ff00'],
+    [/monster/, '#ff0000'],
+    [/master/, '#ff0000'],
+    [/servant/, '#ff0000'],
+    [/compass/, '#5b5b5b'],
 ];
 
 export default function formatText(text, playerNames) {
