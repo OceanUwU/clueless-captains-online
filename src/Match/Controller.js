@@ -107,6 +107,10 @@ function Controller(props) {
     };
     let [votes, setVotes] = React.useState(Array(props.matchInfo.players.length).fill(null));
     let votesA = Array(props.matchInfo.players.length).fill(null);
+    let playerNames = Array(playerColours.length).fill(null);
+    for (let i of props.matchInfo.players) {
+        playerNames[i.num] = i.name;
+    }
 
     React.useEffect(() => {
         //chatRef.current.scrollTop = chatRef.current.scrollHeight - chatRef.current.clientHeight - chatRef.current.clientTop;
@@ -246,13 +250,13 @@ function Controller(props) {
                                         default: color = '#858585';break;
                                     };
                                     return <Typography style={{color}}>
-                                        {formatText(msg.l)}
+                                        {formatText(msg.l, playerNames)}
                                     </Typography>;
                                 } else {
                                     return <Typography>
                                         <span style={{color: '#777777'}}>[<span style={{color: playerColours[msg.p]}}>{props.matchInfo.players.find(p => p.num == msg.p).name}</span>]</span>
                                         {' '}
-                                        {formatText(msg.m)}
+                                        {formatText(msg.m, playerNames)}
                                     </Typography>;
                                 }
                             })}
@@ -292,12 +296,14 @@ function Controller(props) {
                                 <span style={{textAlign: 'center', width: '100%'}}>Voting for: {vote == null ? 'Turn end' : `${vote[0].toUpperCase()}${vote.slice(1)}`}</span>
                             </div>
                             {props.matchInfo.players.map(player => {
-                                return <div onClick={() => socket.emit('vote', player.num)}>
-                                    <div style={{background: playerColours[player.num], width: '100%'}}>
-                                    <span style={{textDecoration: `${player.dead ? 'line-through' : ''} ${socket.id.startsWith(player.id) ? 'underline' : ''}`}}>{player.name}</span>
+                                return <Tooltip title={`p${player.num}`}>
+                                    <div onClick={() => socket.emit('vote', player.num)}>
+                                        <div style={{background: playerColours[player.num], width: '100%'}}>
+                                        <span style={{textDecoration: `${player.dead ? 'line-through' : ''} ${socket.id.startsWith(player.id) ? 'underline' : ''}`}}>{player.name}</span>
+                                        </div>
+                                        <span style={{borderLeft: '1px solid #0000001f', fontSize: 0, padding: 8, background: ((votes[player.num] == null || votes[player.num] == null == true) ? 'white' : playerColours[votes[player.num]])}}>{votes[player.num] == null ? (player.dead ? <CloseIcon style={{color: 'black'}} /> : <MoreHorizIcon style={{color: 'black'}} />) : <CheckIcon style={{color: votes[player.num] === true ? 'black' : 'white'}} />}</span>
                                     </div>
-                                    <span style={{borderLeft: '1px solid #0000001f', fontSize: 0, padding: 8, background: ((votes[player.num] == null || votes[player.num] == null == true) ? 'white' : playerColours[votes[player.num]])}}>{votes[player.num] == null ? (player.dead ? <CloseIcon style={{color: 'black'}} /> : <MoreHorizIcon style={{color: 'black'}} />) : <CheckIcon style={{color: votes[player.num] === true ? 'black' : 'white'}} />}</span>
-                                </div>;
+                                </Tooltip>;
                             })}
                         </div>
                     </div>);
