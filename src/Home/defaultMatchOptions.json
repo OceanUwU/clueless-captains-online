@@ -1,6 +1,6 @@
 {
     "public": false,
-    "players": 5,
+    "players": 8,
     "startHP": 15,
     "maxHP": 15,
     "rockDamage": 1,

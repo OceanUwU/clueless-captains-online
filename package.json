@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server",
-    "build-client": "node src/getFileStructure.js;node node_modules/react-scripts/bin/react-scripts.js build",
+    "build-client": "node getFileStructure.js;node node_modules/react-scripts/bin/react-scripts.js build",
     "dev-client": "node node_modules/react-scripts/bin/react-scripts.js start"
   },
   "keywords": [],
