@@ -81,7 +81,7 @@ function PresetMenu(props) {
                                 presets.push({
                                     id: String(Math.random()).slice(2),
                                     name: document.getElementById('presetName').value,
-                                    options: defaultMatchOptions,
+                                    options: props.options,
                                 });
                                 localStorage.ccpresets = JSON.stringify(presets);
                                 loadPresets();
