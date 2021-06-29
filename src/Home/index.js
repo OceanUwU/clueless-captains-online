@@ -34,7 +34,7 @@ function Home() {
             <Typography className={classes.title} variant="h3" gutterBottom><img className={classes.logoImage} src="/iconanimated.png" alt="Clueless Captains" /></Typography>
 
             <Typography variant="body1" gutterBottom>
-                Embark on a pirate adventure with your friends. <Link onClick={rules.showRules}>Read the rules <rules.ShowRulesIcon fontSize="inherit" /></Link>
+                Embark on a pirate adventure together. <Link onClick={rules.showRules}>Read the rules <rules.ShowRulesIcon fontSize="inherit" /></Link>
             </Typography>
 
             <div className={classes.controls}>

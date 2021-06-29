@@ -5,9 +5,9 @@ import PublicIcon from '@material-ui/icons/Public';
 import LockIcon from '@material-ui/icons/Lock';
 import LinkIcon from '@material-ui/icons/Link';
 import showDialog from '../Dialog/show';
+import PresetMenu from './PresetMenu';
 import socket from '../socket';
 import defaultMatchOptions from './defaultMatchOptions.json';
-import copy from 'clipboard-copy';
 import { TextFieldsOutlined } from '@material-ui/icons';
 const allowedPlayers = [1, 8];
 const maxGamesAllowed = [1, 4];
@@ -21,6 +21,14 @@ const useStyles = makeStyles((theme) => ({
     },
     smallSelect: {
         width: 50,
+    },
+    tile: {
+        width: 50,
+        borderRadius: 5,
+    },
+    card: {
+        width: 70,
+        borderRadius: 3,
     },
 }));
 
@@ -105,11 +113,19 @@ const cardsAvailable = [ //[name:string, non-removable:boolean]
     ['mutiny', false],
 ]
 
+let optionsToLoad = false;
+if (localStorage.ccpresets && localStorage.ccpreset) {
+    let preset = JSON.parse(localStorage.ccpresets).find(preset => preset.id == localStorage.ccpreset);
+    if (preset)
+        optionsToLoad = preset.options;
+}
+console.log(optionsToLoad);
+
 var options = {
     ...defaultMatchOptions,
-    ...localStorage.MatchOptions ? JSON.parse(localStorage.MatchOptions) : {},
-    tiles: {...defaultMatchOptions.tiles, ...localStorage.MatchOptions ? JSON.parse(localStorage.MatchOptions).tiles : {},},
-    cards: {...defaultMatchOptions.cards, ...localStorage.MatchOptions ? JSON.parse(localStorage.MatchOptions).cards : {},},
+    ...optionsToLoad ? optionsToLoad : {},
+    tiles: {...defaultMatchOptions.tiles, ...optionsToLoad ? optionsToLoad.tiles : {},},
+    cards: {...defaultMatchOptions.cards, ...optionsToLoad ? optionsToLoad.cards : {},},
 };
 
 for (let i in options) {
@@ -208,7 +224,9 @@ function MatchOptions(props) {
         options.boardSize[axis] = value;
         setBoardSize([...options.boardSize]);
         resetTiles();
-        options.startPos = [Math.round((options.boardSize[0]-1)/2), Math.round((options.boardSize[1]-1)/2)];
+        for (let i in options.startPos)
+            if (options.startPos[i] != null)
+                options.startPos[i] = Math.round((options.boardSize[i]-1)/2);
         setStartPos([...options.startPos]);
         sendUpdate();
     };
@@ -357,7 +375,14 @@ function MatchOptions(props) {
 
     return (
         <div>
-            <Button color={props.editable ? 'primary' : 'default'} size="small" disabled={!props.editable} onClick={() => {
+            <Button color="secondary" onClick={async () => {
+                dialog = await showDialog({
+                    title: 'Option presets',
+                    buttonText: 'Back',
+                    buttonAction: () => showMatchOptions(props),
+                }, <PresetMenu {...props} showMatchOptions={showMatchOptions} options={options} />);
+            }}>Presets</Button>
+            {/*<Button color={props.editable ? 'primary' : 'default'} size="small" disabled={!props.editable} onClick={() => {
                 options = {...options, ...defaultMatchOptions};
                 updateOptions();
                 sendUpdate();
@@ -367,7 +392,7 @@ function MatchOptions(props) {
             }}>Save/Load preset</Button>
             <Button color="primary" size="small" onClick={() => {
                 localStorage.MatchOptions = JSON.stringify(options);
-            }}>Save these options</Button>
+            }}>Save these options</Button>*/}
             <Divider style={{marginTop: 16}} />
 
             <FormControl className={classes.formControl}>
@@ -499,6 +524,7 @@ function MatchOptions(props) {
                     className={classes.smallSelect}
                     disabled={!props.editable}
                 >
+                    <MenuItem value={null}>Random</MenuItem>
                     {Array(boardSize[1]).fill(null).map((i, e) => e).map(n => <MenuItem key={n} value={n}>{n+1}</MenuItem>)}
                 </Select>
                 <FormHelperText>X</FormHelperText>
@@ -516,6 +542,7 @@ function MatchOptions(props) {
                     className={classes.smallSelect}
                     disabled={!props.editable}
                 >
+                    <MenuItem value={null}>Random</MenuItem>
                     {Array(boardSize[0]).fill(null).map((i, e) => e).map(n => <MenuItem key={n} value={n}>{n+1}</MenuItem>)}
                 </Select>
                 <FormHelperText>Y</FormHelperText>
@@ -569,10 +596,10 @@ function MatchOptions(props) {
 
             <FormControl className={classes.formControl}>
                 <FormLabel>Tiles</FormLabel>
-                <div style={{display: 'flex', flexWrap: 'wrap'}}>
+                <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly'}}>
                     {
                         tilesAvailable.map(tile => <span style={{marginRight: 5, textAlign: 'center'}}>
-                            <img src={`/tiles/${tile[0]}.png`} width={50} />
+                            <img src={`/tiles/${tile[0]}.png`} class={classes.tile} />
                             <br />
                             <NumberTweaker fn={change => changeTiles(change, tile[0])} min={tile[1] ? 1 : 0} max={(boardSize[0]*boardSize[1])-(Object.values(tiles).reduce((a,b)=>a+b)-tiles[tile[0]])-1} state={tiles[tile[0]]} disabled={!props.editable} />
                         </span>)
@@ -598,20 +625,22 @@ function MatchOptions(props) {
                 <Typography>Changing this may also reset the amounts of each type of cards.</Typography>
             </FormControl>
 
-            <Divider />
+            {topPlayed > 0 ? <div>
+                <Divider />
 
-            <FormControlLabel
-                control={<Checkbox color="primary" checked={evilsSeeCards} onChange={evilsSeeCardsChange} disabled={!props.editable} />}
-                label="Tell sea monsters which cards were played from the top of the deck?"
-                labelPlacement="start"
-            />
+                <FormControlLabel
+                    control={<Checkbox color="primary" checked={evilsSeeCards} onChange={evilsSeeCardsChange} disabled={!props.editable} />}
+                    label="Tell sea monsters which cards were played from the top of the deck?"
+                    labelPlacement="start"
+                />
+            </div> : null}
 
             <Divider />
 
             <FormControl className={classes.formControl}>
                 <FormLabel>Cards drawn per hand</FormLabel>
                 <RadioGroup value={handSize} onChange={changeHandSize} row>
-                    {[2, 3, 4, 5].map(n => <FormControlLabel value={n} key={n} control={<Radio color="primary" disabled={!props.editable} />} label={n} />)}
+                    {[1, 2, 3, 4, 5].map(n => <FormControlLabel value={n} key={n} control={<Radio color="primary" disabled={!props.editable} />} label={n} />)}
                 </RadioGroup>
                 <Typography>Changing this may also reset the amounts of each type of cards. A deck with at least {players*handSize+topPlayed} non-removable cards is required (also changes based on max players and "Cards played from the top of the deck each turn").</Typography>
             </FormControl>
@@ -656,16 +685,16 @@ function MatchOptions(props) {
 
             <FormControl className={classes.formControl}>
                 <FormLabel>Cards</FormLabel>
-                <div style={{display: 'flex', flexWrap: 'wrap'}}>
+                <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly'}}>
                     {
                         cardsAvailable.map(card => <span style={{marginRight: 5, textAlign: 'center'}}>
-                            <img src={`/cards/${card[0]}.png`} width={70} />
+                            <img src={`/cards/${card[0]}.png`} class={classes.card} />
                             <br />
                             <NumberTweaker fn={change => changeCards(change, card[0])} min={card[1] ? (nrCards <= players*handSize+topPlayed ? cards[card[0]] : 0) : 0} max={99} state={cards[card[0]]} disabled={!props.editable} />
                         </span>)
                     }
                 </div>
-                <Typography>There's {Object.values(cards).reduce((a,b)=>a+b)} cards in this deck ({nrCards} non-removable).</Typography>
+                <Typography>There are {Object.values(cards).reduce((a,b)=>a+b)} cards in this deck ({nrCards} non-removable).</Typography>
             </FormControl>
             
             <Divider />
@@ -699,14 +728,16 @@ function MatchOptions(props) {
                 >
                     <MenuItem value={0}>Sea Sight</MenuItem>
                     <MenuItem value={1}>Sea Blindness</MenuItem>
-                    <MenuItem value={2}>Allied Traitor</MenuItem>
-                    <MenuItem value={3}>Open Seas</MenuItem>
+                    <MenuItem value={2}>Single Monster</MenuItem>
+                    <MenuItem value={3}>Allied Traitor</MenuItem>
+                    <MenuItem value={4}>Open Seas</MenuItem>
                 </Select>
                 <FormHelperText>{(() => ({
-                    0: 'All Sea Monsters know their teammate (if they have one)',
-                    1: 'Sea Monsters don\'t know who their teammate is',
-                    2: 'Play with Allied Traitor rules (see rulebook)',
-                    3: 'Pirates only! No Sea Monsters in this mode!',
+                    0: 'Two Sea Monsters who know each other. 5+ players needed or mode is set to Single Monster.',
+                    1: 'Two Sea Monsters who don\'t know who each other are. 5+ players needed or mode is set to Single Monster.',
+                    2: 'There\'s only one sea monster in this mode. 3+ players needed or mode is set to Open Seas.',
+                    3: 'Play with Allied Traitor rules (see rulebook). 5+ players needed or mode is set to Single Monster.',
+                    4: 'Pirates only! No Sea Monsters in this mode! Any number of players allowed.',
                 }[mode]))()}</FormHelperText>
             </FormControl>
 
@@ -720,13 +751,11 @@ function MatchOptions(props) {
                     disabled={!props.editable}
                 >
                     <MenuItem value={0}>Normal</MenuItem>
-                    <MenuItem value={1}>Gifted</MenuItem>
-                    <MenuItem value={2}>Random</MenuItem>
+                    <MenuItem value={1}>Random</MenuItem>
                 </Select>
                 <FormHelperText>{(() => ({
-                    0: 'Players use their chosen name',
-                    1: 'Players\' chosen names are shuffled between them',
-                    2: 'Each player gets a pirate name',
+                    0: 'Players use their chosen name and colour',
+                    1: 'Each player gets a random pirate name and random colour',
                 }[nameConvention]))()}</FormHelperText>
             </FormControl>
         </div>
@@ -769,7 +798,7 @@ async function showMatchOptions(props) {
     dialog.editable = props.editable;
 }
 
-function PresetLoader(props) {
+/*function PresetLoader(props) {
     let [enteredOptions, setEnteredOptions] = React.useState('');
     let copyHelp = 'Copy the options code for your currently chosen match options.';
     let [copyTitle, setCopyTitle] = React.useState(copyHelp);
@@ -807,14 +836,12 @@ function PresetLoader(props) {
 }
 
 async function presetLoader(props) {
-    let elem;
-
     dialog = await showDialog({
         title: 'Preset loader/saver',
         buttonText: 'Match options',
         buttonAction: () => showMatchOptions(props),
     }, <PresetLoader {...props} />);
-}
+}*/
 
 export default {
     showMatchOptions,

@@ -230,6 +230,9 @@ class Match {
 
         //shuffle tiles + set up board
         let nonWaterTiles = Object.keys(this.tiles).map(tile => Array(this.tiles[tile]).fill(tile));
+        for (let i in (this.startPos))
+            if (this.startPos[i] == null)
+                this.startPos[i] = Math.floor(Math.random() * this.boardSize[i]);
         this.ship = [...this.startPos];
         switch (this.startDir) {
             case 0: this.dir = Math.floor(Math.random() * 8); break;
@@ -257,9 +260,9 @@ class Match {
         //give out roles
         let roles = Array(this.playersPlaying).fill('pirate');
         switch (this.mode) {
-            case 2:
-                if (this.playersPlaying < 6) {
-                    this.mode = 1; //set to mode 1 - sea blindness
+            case 3:
+                if (this.playersPlaying < 5) {
+                    this.mode = 2; //set to single monster
                     //fallthrough
                 } else {
                     roles[0] = 'biologist';
@@ -269,21 +272,25 @@ class Match {
                 }
             
             case 0:
-                if (this.playersPlaying < 6) //if there arent enough players for a second sea monster
-                    this.mode = 1; //set to mode 1 - sea blindness (no need to see teammates)
-                //fallthrough (same roles as mode 1)
             case 1:
-                if (this.playersPlaying < 3) { //if there arent enough players for pirates
-                    this.mode = 3; //set to pirate only mode
-                    //fallthrough (same roles as mode 3)
+                if (this.playersPlaying < 5) { //if there arent enough players for 2 sea monsters
+                    this.mode = 2; //set to single monster
+                    //fallthrough
                 } else {
                     roles[0] = 'seamonster';
-                    if (this.playersPlaying >= 6) //if there are enough players for a second sea monster
-                        roles[1] = 'seamonster'; //add one
+                    roles[1] = 'seamonster';
                     break;
                 }
+            
+            case 2:
+                if (this.playersPlaying < 3) { //if there arent enough players for a sea monster
+                    this.mode = 4; //set to open seas
+                    //fallthrough
+                } else {
+                    roles[0] = 'seamonster';
+                }
 
-            case 3: //everyone is a pirate
+            case 4: //everyone is a pirate
                 break; //so no need to change roles
         }
         shuffleArray(roles);
@@ -294,13 +301,13 @@ class Match {
             case 0: //normal
                 break;
 
-            case 1: //gifted
-                let shuffledNames = shuffleArray(Object.values(this.players).map(player => player.name));
-                Object.values(this.players).forEach((player, index) => player.name = shuffledNames[index]);
-                break;
-
-            case 2: //random
-                Object.values(this.players).forEach((player, index) => player.name = nameWords[index]);
+            case 1: //random
+                let nums = shuffleArray([...Array(16).keys()]);
+                let names = shuffleArray(nameWords);
+                Object.values(this.players).forEach((player, index) => {
+                    player.name = names[index];
+                    player.num = nums[index];
+                });
                 break;         
         }
 
@@ -332,7 +339,7 @@ class Match {
                 case 'seamaster': //fallthrough (sea master starts out the same as a sightful sea monster)
                 case 'seamonster':
                     player.allegiance = 'seamonster';
-                    if (this.mode == 0 || this.mode == 2) //if sea monsters should be able to see teammates (or this is the sea master)
+                    if (this.mode == 0 || this.mode == 3) //if sea monsters should be able to see teammates (or this is the sea master)
                         startInfo.teammate = startInfo.players.find(pl => pl.num == Object.values(this.players).find(p => ((p.num != player.num) && (p.role == 'seamonster' || p.role == 'seaservant'))).num);
                     break;
                 case 'seaservant':
@@ -393,7 +400,7 @@ class Match {
         player.cardsPlayed = cardsChosen.length;
         player.waitStatus = 1;
         this.waitStatuses();
-        this.sendLog(`${player.name} played ${player.cardsPlayed} card${player.cardsPlayed == 1 ? '' : 's'}.`);
+        this.sendLog(`p${player.num} played ${player.cardsPlayed} card${player.cardsPlayed == 1 ? '' : 's'}.`);
     }
 
     waitStatuses() {
@@ -702,10 +709,10 @@ class Match {
                             switch (this.currentVote) {
                                 case 'brig':
                                     votedP.playIn += 2;
-                                    this.sendLog(`${votedP.name} was sent to the brig. They will not be able to play cards for the next 2 turns.`);
+                                    this.sendLog(`p${votedP.num} was sent to the brig. They will not be able to play cards for the next 2 turns.`);
                                     break;
                                 case 'captain':
-                                    this.sendLog(`${votedP.name} was elected as captain. No one but them will play cards next turn.`);
+                                    this.sendLog(`p${votedP.num} was elected as captain. No one but them will play cards next turn.`);
                                     Object.values(this.players).forEach(player => {
                                         if (player.num == voted)
                                             player.playIn = 0;
@@ -714,7 +721,7 @@ class Match {
                                     });
                                     break;
                                 case 'investigate':
-                                    this.sendLog(`${votedP.name} was elected as investigator. This investigate card has been discarded permanently, and the newly elected investigator will now choose someone to discover the role of.`);
+                                    this.sendLog(`p${votedP.num} was elected as investigator. This investigate card has been discarded permanently, and the newly elected investigator will now choose someone to discover the role of.`);
                                     this.phase = 'choosePlayer';
                                     this.chooseOccasion = 'investigate';
                                     this.investigator = voted;
@@ -723,7 +730,7 @@ class Match {
                                     end = false;
                                     break;
                                 case 'mutiny':
-                                    this.sendLog(`${votedP.name} was killed. They were a ${votedP.role}. This mutiny card will now be discarded permanently.`);
+                                    this.sendLog(`p${votedP.num} was killed. They were a ${votedP.role}. This mutiny card will now be discarded permanently.`);
                                     votedP.dead = true;
                                     votedP.playIn = Infinity;
                                     io.to(this.code).emit('die', voted);
@@ -750,7 +757,7 @@ class Match {
             switch (this.chooseOccasion) {
                 case 'alliedTraitor':
                     if (chooser.role != 'seamaster') return;
-                    this.sendLog(`${chooser.name} chose ${player.name} as who they thought was the biologist.`);
+                    this.sendLog(`p${chooser.num} chose p${player.num} as who they thought was the biologist.`);
                     if (player.role == 'biologist')
                         this.endMatch('snitch');
                     else
@@ -759,7 +766,7 @@ class Match {
 
                 case 'investigate':
                     if (chooser.num != this.investigator) return;
-                    this.sendLog(`${chooser.name} investigated ${player.name}, and has been sent the name of their team. You now have ${Math.round(20000/1000)} seconds to discuss before the next turn starts.`);
+                    this.sendLog(`p${chooser.num} investigated p${player.num}, and has been sent the name of their team. You now have ${Math.round(20000/1000)} seconds to discuss before the next turn starts.`);
                     chooser.socket.emit('message', {l: `${player.name}'s team is: ${player.allegiance}`, o: 'i'});
                     setTimeout(this.endTurn.bind(this), 20000);
                     break;
@@ -787,7 +794,7 @@ class Match {
                 this.chooseOccasion = 'alliedTraitor';
                 this.phase = 'choosePlayer';
                 sm.socket.emit('choosePlayer', 'Who do you think is the biologist?');
-                this.sendLog(`The pirates have achieved their win condition, but the Sea Master (${sm.name}) is now guessing who the biologist is, and if they guess correctly, the sea monsters will win instead of the pirates.`)
+                this.sendLog(`The pirates have achieved their win condition, but the Sea Master (p${sm.num}) is now guessing who the biologist is, and if they guess correctly, the sea monsters will win instead of the pirates.`)
             } else {
                 let results = {
                     cause,

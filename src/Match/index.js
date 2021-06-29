@@ -94,11 +94,11 @@ function Match(props) {
     return (
         <div>
             <div className={classes.gameInfo}>
-                <Tooltip title="treasures found / treasures needed (for pirates to win) / total treasures">
+                <Tooltip title="treasures collected / treasures needed (for pirates to win) / total treasures">
                     <div>
                         <div className={classes.gameInfoTitle}>
                             <Typography variant="subtitle1">
-                                Treasures found
+                                Treasures collected
                             </Typography>
                         </div>
                         <div className={classes.gameInfoContent}>

@@ -1,7 +1,7 @@
 const { SportsCricket } = require('@material-ui/icons');
 const cfg = require('./cfg');
 const maxUsernameLength = 6;
-const allowedUsernameChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 áéíóúÁÉÍÓÚ!"£$€%^&*()-=_+[]{};\'#:@~,./<>?\\|`¬¦';
+const allowedUsernameChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ';
 const colorsAllowed = [...Array(16).keys()];
 const playersAllowed = [1, 8];
 const HPAllowed = [1, 999];
@@ -21,7 +21,7 @@ const tiles = [
 ];
 const requiredTiles = tiles.filter(tile => tile[1]).map(tile => tile[0]);
 const topPlayedAllowed = [0, 3];
-const handSizeAllowed = [2, 5];
+const handSizeAllowed = [1, 5];
 const cards = [
     ['n1', true],
     ['n2', true],
@@ -94,8 +94,8 @@ const cards = [
 ];
 const nrCards = cards.filter(card => card[1]).map(card => card[0]);
 const votingAnonymities = [0,1,2];
-const modesAllowed = [0,1,2,3];
-const namesAllowed = [0,1,2];
+const modesAllowed = [0,1,2,3,4];
+const namesAllowed = [0,1];
 
 const codeChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -166,7 +166,7 @@ let optionsValid = options => (
     && Array.isArray(options.boardSize)
     && options.boardSize.every(i => Number.isInteger(i) && i >= boardSizeAllowed[0] && i <= boardSizeAllowed[1])
     && Array.isArray(options.startPos)
-    && options.startPos.every((i, e) => Number.isInteger(i) && i >= 0 && i < options.boardSize[e])
+    && options.startPos.every((i, e) => ((i === null) || (Number.isInteger(i) && i >= 0 && i < options.boardSize[e])))
     && Number.isInteger(options.startDir)
     && options.startDir >= 0
     && options.startDir <= 10

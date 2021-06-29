@@ -16,28 +16,24 @@ function RoleInfo(props) {
                         switch (props.matchInfo.options.mode) {
                             case 0:
                             case 1:
-                                let seamonsters = props.matchInfo.players.length >= 6 ? 2 : 1;
-                                return `There ${seamonsters == 2 ? 'are' : 'is'} ${seamonsters} sea monster${seamonsters == 2 ? 's' : ''} in this match, everyone else is a pirate.`;
-                                break;
+                                return `There are 2 sea monsters in this match, everyone else is a pirate. The sea monsters ${props.matchInfo.options.mode == 1 ? 'don\'t ' : ''}know who their teammate is.`;
                             case 2:
+                                return 'There\'s 1 sea monster in this match, everyone else is a pirate.';
+                            case 3:
                                 let pirates = props.matchInfo.players.length - 2;
                                 return `There are ${pirates-1} other pirates on your team, one of whom is a biologist who knows the identity of the sea monsters. There's 1 Sea Master and 1 Sea Servant.`;
-                                break;
-                            case 3:
+                            case 4:
                                 return 'Everyone is a pirate in this match! There are no sea monsters.';
-                                break;
                         }
-                        break;
                     
                     case 'seamonster':
-                        if (props.matchInfo.options.mode == 0) {
-                            return <span><span style={{color: playerColours[props.matchInfo.teammate.num]}}>{props.matchInfo.teammate.name}</span> is also a sea monster, everyone else is a pirate.</span>;
-                        } else {
-                            if (props.matchInfo.players.length >= 6) {
+                        switch (props.matchInfo.options.mode) {
+                            case 0:
+                                return <span><span style={{color: playerColours[props.matchInfo.teammate.num]}}>{props.matchInfo.teammate.name}</span> is also a sea monster, everyone else is a pirate.</span>;
+                            case 1:
                                 return 'There\'s 1 other sea monster who is on your team, everyone else is a pirate.';
-                            } else {
+                            case 2:
                                 return 'You\'re the only sea monster. Everyone else is a pirate.';
-                            }
                         }
                     
                     case 'seaservant':
