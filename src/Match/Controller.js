@@ -254,7 +254,7 @@ function Controller(props) {
                                     </Typography>;
                                 } else {
                                     return <Typography>
-                                        <span style={{color: '#777777'}}>[<span style={{color: playerColours[msg.p]}}>{props.matchInfo.players.find(p => p.num == msg.p).name}</span>]</span>
+                                        <span style={{color: '#777777'}}>[{formatText(`p${msg.p}`, playerNames)}]</span>
                                         {' '}
                                         {formatText(msg.m, playerNames)}
                                     </Typography>;
@@ -296,7 +296,7 @@ function Controller(props) {
                                 <span style={{textAlign: 'center', width: '100%'}}>Voting for: {vote == null ? 'Turn end' : `${vote[0].toUpperCase()}${vote.slice(1)}`}</span>
                             </div>
                             {props.matchInfo.players.map(player => {
-                                return <Tooltip title={`p${player.num}`}>
+                                return <Tooltip title={`p${player.num} > ${votes[player.num] === false ? 'abstain' : (votes[player.num] == null ? 'hasn\'t voted' : (votes[player.num] == true ? 'has voted' : `p${votes[player.num]}`))}`}>
                                     <div onClick={() => socket.emit('vote', player.num)}>
                                         <div style={{background: playerColours[player.num], width: '100%'}}>
                                         <span style={{textDecoration: `${player.dead ? 'line-through' : ''} ${socket.id.startsWith(player.id) ? 'underline' : ''}`}}>{player.name}</span>
@@ -306,6 +306,7 @@ function Controller(props) {
                                 </Tooltip>;
                             })}
                             <span style={{width: '100%', display: 'flex', justifyContent: 'center'}}><Tooltip title="Vote for no one"><Button onClick={() => socket.emit('vote', false)} variant="contained" size="small" disableElevation>Abstain</Button></Tooltip></span>
+                            {votes[props.matchInfo.me.num] !== null ? <span style={{width: '100%', display: 'flex', justifyContent: 'center'}}><Tooltip title="Undo your vote"><Button onClick={() => socket.emit('vote', null)} variant="contained" size="small" disableElevation>Remove vote</Button></Tooltip></span> : null}
                         </div>
                     </div>);
 

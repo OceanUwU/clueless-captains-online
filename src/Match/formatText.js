@@ -28,6 +28,16 @@ const colourOverrides = [
     [/compass/, '#5b5b5b'],
 ];
 
+function PlayerName(playerNames, num, space) {
+    return (
+        <Tooltip title={`p${num}`}>
+            <span style={{color: playerColours[num]}}>
+                {space}{playerNames[num]}
+            </span>
+        </Tooltip>
+    );
+}
+
 export default function formatText(text, playerNames) {
     let words = text.split(' ');
     return (
@@ -64,13 +74,13 @@ export default function formatText(text, playerNames) {
                     let num = Number(hashtag.slice(1));
                     console.log(playerNames);
                     if (playerNames[num] != null) {
-                        return <span style={{color: playerColours[num]}}>{space}{playerNames[num]}</span>;
+                        return PlayerName(playerNames, num, space);
                     }
                 }
 
                 for (let i in playerNames) {
                     if (playerNames[i] != null && playerNames[i].toLowerCase() == hashtag) {
-                        return <span style={{color: playerColours[i]}}>{space}{playerNames[i]}</span>;
+                        return PlayerName(playerNames, i, space);
                     }
                 }
             //}
