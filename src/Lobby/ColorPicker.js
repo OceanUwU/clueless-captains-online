@@ -1,12 +1,30 @@
 import React from 'react';
-import { ButtonGroup, Button } from '@material-ui/core';
+import { ButtonGroup, Button, Tooltip } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import playerColours from '../Match/playerColours.json';
 import socket from '../socket';
 
-function saveColor(num) {
-}
+const useStyles = makeStyles((theme) => ({
+    colorButton: {
+        color: 'white',
+        height: '2.5em',
+        minWidth: 0,
+        width: 24,
+        height: 24,
+        padding: 0,
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+    },
+}));
+
+const rows = 10;
+const columns = 10;
 
 function ColorPicker(props) {
+    const classes = useStyles();
+
     const [selected, setSelected] = React.useState(props.selected);
     const [taken, setTaken] = React.useState([]);
 
@@ -30,20 +48,23 @@ function ColorPicker(props) {
         <ButtonGroup orientation="vertical">
             {(() => {
                 let buttonGroups = [];
-                for (let i = 0; i < 16; i+=4) {
+                for (let i = 0; i < rows * columns; i+=rows) {
                     buttonGroups.push(<ButtonGroup>{(() => {
                         let buttons = [];
-                        for (let k = i; k < i+4; k++) {
+                        for (let k = i; k < i+rows; k++) {
                             buttons.push(
-                                <Button
-                                    style={{color: 'white', backgroundColor: playerColours[k], height:'2.5em', width: 0}}
-                                    onClick={() => {
-                                        if (!taken.includes(k)) {
-                                            localStorage.cccolor = String(k);
-                                            setSelected(k);
-                                        }
-                                    }}
-                                >{selected == k ? '✓' : (taken.includes(k) ? '✕' : ' ')}</Button>
+                                <Tooltip title={playerColours[k]}>
+                                    <Button
+                                        className={classes.colorButton}
+                                        style={{backgroundColor: playerColours[k]}}
+                                        onClick={() => {
+                                            if (!taken.includes(k)) {
+                                                localStorage.cccolor = String(k);
+                                                setSelected(k);
+                                            }
+                                        }}
+                                    >{selected == k ? '✓' : (taken.includes(k) ? '✕' : ' ')}</Button>
+                                </Tooltip>
                             );
                         }
                         return buttons;
