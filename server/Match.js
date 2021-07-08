@@ -302,7 +302,7 @@ class Match {
                 break;
 
             case 1: //random
-                let nums = shuffleArray([...Array(16).keys()]);
+                let nums = shuffleArray([...Array(100).keys()]);
                 let names = shuffleArray(nameWords);
                 Object.values(this.players).forEach((player, index) => {
                     player.name = names[index];
