@@ -139,7 +139,7 @@ function createMatch(socket, options) {
 }
 
 let optionsValid = options => (
-    typeof options == 'object
+    typeof options == 'object'
     && options != null
     && typeof options.public == 'boolean'
     && Number.isInteger(options.players)

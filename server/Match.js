@@ -133,7 +133,6 @@ class Match {
     join(player) {
         let numsTaken = Object.values(this.players).map(p => p.num);
         let numsAvailable = [...Array(100).keys()].filter(n => !numsTaken.includes(n));
-        console.log(numsAvailable);
         let num = numsAvailable[Math.floor(Math.random() * numsAvailable.length)];
         this.players[player] = {
             ...JSON.parse(JSON.stringify(defaultPlayer)),
@@ -371,7 +370,6 @@ class Match {
         this.playPile = this.drawPile.splice(0, this.topPlayed); //play the correct amount of cards from the top of the draw pile
         if (this.topPlayed > 0) {
             this.sendLog(`${this.topPlayed} card${this.topPlayed == 1 ? '' : 's'} were played from the top of the draw pile.`);
-            console.log(this.evilsSeeCards, this.players);
             if (this.evilsSeeCards)
                 for (let player of Object.values(this.players))
                     if (player.allegiance == 'seamonster')
@@ -702,7 +700,10 @@ class Match {
                         let keep = true;
                         let end = true;
                         let votes = {};
-                        Object.values(this.players).forEach(p => votes[p.vote] = votes.hasOwnProperty(p.vote) ? votes[p.vote]+1 : 1);
+                        Object.values(this.players).forEach(p => {
+                            if (p.vote !== false)
+                                votes[p.vote] = votes.hasOwnProperty(p.vote) ? votes[p.vote]+1 : 1;
+                        });
                         let voted = Object.keys(votes).find(v => votes[v] >= Object.values(this.players).filter(p => !p.dead).length - Object.values(this.players).filter(p => p.role.startsWith('sea')).length);
                         let votedP = Object.values(this.players).find(p => p.num == voted);
                         if (voted != undefined) {
@@ -786,7 +787,7 @@ class Match {
 
     endMatch(cause) {
         setTimeout((() => {
-            if (this.mode == 2 && ['treasure', 'kill'].includes(cause) && !this.snitchAttempted) {
+            if (this.mode == 3 && ['treasure', 'kill'].includes(cause) && !this.snitchAttempted) {
                 this.snitchAttempted = true;
                 this.previousCause = cause;
                 io.to(this.code).emit('discuss', null);
