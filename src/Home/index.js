@@ -9,7 +9,7 @@ import showMatchOptions from './showMatchOptions';
 import showDialog from '../Dialog/show';
 import playerColours from '../Match/playerColours.json';
 import rules from '../Rules';
-import { PinDropSharp } from '@material-ui/icons';
+import { BlockRounded, PinDropSharp } from '@material-ui/icons';
 
 const useStyles = makeStyles({
     logoImage: {
@@ -33,7 +33,9 @@ function Home() {
         <div>
             <Typography className={classes.title} variant="h3" gutterBottom><img className={classes.logoImage} src="/iconanimated.png" alt="Clueless Captains" /></Typography>
 
-            <Typography variant="body1" gutterBottom>
+            <Typography variant="body1" style={{textAlign: 'center'}} gutterBottom>
+                <span style={{fontWeight: 'bold', fontSize: '1.5em'}}>An online version of <Link href="https://www.willgriff.org/clueless-captains" target="_blank">the board game by Will Griff</Link>.</span>
+                <br />
                 Embark on a pirate adventure together. <Link onClick={rules.showRules}>Read the rules <rules.ShowRulesIcon fontSize="inherit" /></Link>
             </Typography>
 
@@ -51,6 +53,12 @@ function Home() {
                 <br /><br /><br />
 
                 <CodeInput />
+            </div>
+
+            <div style={{textAlign: 'center', marginTop: 30}}>
+                <a href="https://ocean.lol">
+                    <img width={100} src="https://ocean.lol/media/mark-b.png" />
+                </a>
             </div>
         </div>
     );
