@@ -9,7 +9,6 @@ import showMatchOptions from './showMatchOptions';
 import showDialog from '../Dialog/show';
 import playerColours from '../Match/playerColours.json';
 import rules from '../Rules';
-import { BlockRounded, PinDropSharp } from '@material-ui/icons';
 
 const useStyles = makeStyles({
     logoImage: {
