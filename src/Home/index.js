@@ -33,7 +33,7 @@ function Home() {
             <Typography className={classes.title} variant="h3" gutterBottom><img className={classes.logoImage} src="/iconanimated.png" alt="Clueless Captains" /></Typography>
 
             <Typography variant="body1" style={{textAlign: 'center'}} gutterBottom>
-                <span style={{fontWeight: 'bold', fontSize: '1.5em'}}>An online version of <Link href="https://www.willgriff.org/clueless-captains" target="_blank">the board game by Will Griff</Link>.</span>
+                <span style={{fontWeight: 'bold', fontSize: '1.5em'}}>An online version of <Link href="https://www.willgriff.org/other/clueless-captains" target="_blank">the board game by Will Griff</Link>.</span>
                 <br />
                 Embark on a pirate adventure together. <Link onClick={rules.showRules}>Read the rules <rules.ShowRulesIcon fontSize="inherit" /></Link>
             </Typography>
